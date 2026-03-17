@@ -14,8 +14,8 @@ import { Button } from '../../ui/Button';
 
 function LoginPage() {
     const { t } = useTranslation();
-    const [email, setEmail] = useState(import.meta.env.VITE_TEST_EMAIL || '');
-    const [password, setPassword] = useState(import.meta.env.VITE_TEST_PASSWORD || '');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();

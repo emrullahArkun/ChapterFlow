@@ -10,7 +10,8 @@ import {
     useToast,
     Spinner,
     Flex,
-    VStack
+    VStack,
+    Text
 } from '@chakra-ui/react';
 import { booksApi } from '../../books/api';
 import { useBookStats } from '../hooks/useBookStats';
@@ -64,6 +65,8 @@ const BookStatsPage = () => {
     usePinstripeBackground();
     const { bgColor, cardBg, textColor, subTextColor, brandColor } = useThemeTokens();
 
+    const hasSessions = sessions && sessions.length > 0;
+
     if (loading) return (
         <Flex justify="center" align="center" h="100vh" bg={bgColor}>
             <Spinner size="xl" color={brandColor} thickness="4px" />
@@ -94,11 +97,16 @@ const BookStatsPage = () => {
                     <GridItem w="full" h="full" display="flex" flexDirection="column" overflow="hidden">
                         <VStack spacing={5} align="stretch" w="full" h="full" overflow="hidden">
                             {/* KPI Cards */}
+                            {!hasSessions && (
+                                <Text fontSize="sm" color="gray.400" textAlign="center" py={1}>
+                                    {t('bookStats.noSessionsHint')}
+                                </Text>
+                            )}
                             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={5} flexShrink={0}>
                                 <StatsCard
                                     icon={FaClock}
                                     label={t('bookStats.totalTime.label')}
-                                    value={stats?.totalTime || '0h 0m'}
+                                    value={hasSessions ? (stats?.totalTime || '-') : '-'}
                                     subLabel={t('bookStats.totalTime.subLabel')}
                                     color="teal.200"
                                     delay={0.1}
@@ -108,7 +116,7 @@ const BookStatsPage = () => {
                                 <StatsCard
                                     icon={FaBookOpen}
                                     label={t('bookStats.speed.label')}
-                                    value={stats?.speed || '0.0'}
+                                    value={hasSessions ? (stats?.speed || '-') : '-'}
                                     subLabel={t('bookStats.speed.subLabel')}
                                     color="blue.200"
                                     delay={0.2}
@@ -119,7 +127,7 @@ const BookStatsPage = () => {
                                     <StatsCard
                                         icon={FaChartLine}
                                         label={t('bookStats.projection.label')}
-                                        value={`~${stats?.timeLeft || '...'}`}
+                                        value={hasSessions ? `~${stats?.timeLeft || '-'}` : '-'}
                                         subLabel={t('bookStats.projection.subLabel')}
                                         color="purple.200"
                                         delay={0.3}

@@ -231,6 +231,7 @@
             "noData": "No data available yet",
             "readNow": "Read Now"
         },
+        "noSessionsHint": "Start a reading session to see your stats.",
         "notFound": "Book not found",
         "currentPage": "Current Page",
         "calendarHint": "Tap date for details",

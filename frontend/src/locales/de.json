@@ -231,6 +231,7 @@
             "noData": "Noch keine Daten verfügbar",
             "readNow": "Jetzt lesen"
         },
+        "noSessionsHint": "Starte eine Lesesession, um deine Statistiken zu sehen.",
         "notFound": "Buch nicht gefunden",
         "currentPage": "Aktuelle Seite",
         "calendarHint": "Tippe auf ein Datum für Details",

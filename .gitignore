@@ -36,3 +36,4 @@ build/
 
 ### Local Env ###
 .env
+.env.*
