@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -81,6 +82,14 @@ public class ReadingSessionController {
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(sessions);
+    }
+
+    @GetMapping("/streak")
+    public ResponseEntity<Map<String, Integer>> getStreak(@CurrentUser User user) {
+        return ResponseEntity.ok(Map.of(
+                "currentStreak", sessionService.calculateCurrentStreak(user),
+                "longestStreak", sessionService.calculateLongestStreak(user)
+        ));
     }
 
     private ReadingSessionDto mapToDto(ReadingSession session) {

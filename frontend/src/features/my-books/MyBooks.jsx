@@ -1,18 +1,19 @@
 import { useEffect, useState, useRef } from 'react';
-import { FaTrash, FaTrashAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaTrash, FaTrashAlt, FaChevronLeft, FaChevronRight, FaSearch } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useMyBooks } from './hooks/useMyBooks';
 import { usePinstripeBackground } from '../../shared/hooks/usePinstripeBackground';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 
 import MyBookCard from './components/MyBookCard';
+import { useNavigate } from 'react-router-dom';
 import {
     Flex,
     Button,
     Center,
     Text,
-    HStack,
     Box,
+    Icon,
     IconButton,
     useToast,
     useDisclosure,
@@ -20,6 +21,7 @@ import {
 
 function MyBooks() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const containerRef = useRef(null);
 
     const [dynamicPageSize, setDynamicPageSize] = useState(12);
@@ -155,9 +157,29 @@ function MyBooks() {
             </Flex>
 
             {books.length === 0 ? (
-                <Center flexDirection="column" py={16} color="gray.400">
-                    <Text fontSize="lg" mb={1}>{t('myBooks.empty.line1')}</Text>
-                    <Text fontSize="sm" color="gray.500">{t('myBooks.empty.line2')}</Text>
+                <Center flexDirection="column" py={16}>
+                    <Box
+                        textAlign="center"
+                        py={12}
+                        px={8}
+                        bg="whiteAlpha.50"
+                        borderRadius="2xl"
+                        border="1px dashed"
+                        borderColor="whiteAlpha.200"
+                        maxW="400px"
+                    >
+                        <Icon as={FaSearch} color="gray.400" boxSize={10} mb={4} />
+                        <Text color="gray.300" fontSize="lg" mb={2}>{t('myBooks.empty.line1')}</Text>
+                        <Text color="gray.400" fontSize="sm" mb={5}>{t('myBooks.empty.line2')}</Text>
+                        <Button
+                            size="sm"
+                            colorScheme="teal"
+                            variant="outline"
+                            onClick={() => navigate('/search')}
+                        >
+                            {t('search.button')}
+                        </Button>
+                    </Box>
                 </Center>
             ) : (
                 <>

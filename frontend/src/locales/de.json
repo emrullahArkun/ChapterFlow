@@ -14,10 +14,17 @@
         "goals": "Meine Ziele",
         "yourTargets": "Deine Ziele",
         "noGoals": "Keine aktiven Ziele",
+        "noGoalsHint": "Öffne ein Buch und setze ein Leseziel.",
         "active": "Aktiv",
+        "completedGoals": "Erledigt",
         "frequency": {
             "weekly": "Wöchentlich",
             "monthly": "Monatlich"
+        },
+        "streak": {
+            "current": "Tage-Streak",
+            "longest": "Längster Streak",
+            "days": "Tage"
         }
     },
     "search": {

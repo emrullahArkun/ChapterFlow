@@ -38,7 +38,6 @@ const ReadingSessionPage = () => {
         showStopConfirm,
         endPage,
         setEndPage,
-        handleBackClick,
         handleStopClick,
         handleStopCancel,
         handleConfirmStop
@@ -46,13 +45,6 @@ const ReadingSessionPage = () => {
 
     const navigate = useNavigate();
     const { isOpen: isExitConfirmOpen, onOpen: onExitConfirmOpen, onClose: onExitConfirmClose } = useDisclosure();
-
-    const onBack = () => {
-        const needsConfirm = handleBackClick();
-        if (needsConfirm) {
-            onExitConfirmOpen();
-        }
-    };
 
     const confirmExit = () => {
         onExitConfirmClose();
