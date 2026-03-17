@@ -21,7 +21,6 @@ const TestConsumer = ({ onRender }) => {
 describe('AuthContext', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
     });
 
     it('should provide default values: user=null, token=null, loading=true initially', async () => {

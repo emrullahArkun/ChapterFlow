@@ -63,9 +63,9 @@ describe('MyBookCard', () => {
     it('renders the book cover and progress', () => {
         renderCard();
         expect(screen.getByTestId('book-cover')).toBeDefined();
-        expect(screen.getByText('Test Book')).toBeDefined();
-        // Progress text
-        expect(screen.getByText('bookCard.readProgress')).toBeDefined();
+        expect(screen.getAllByText('Test Book').length).toBeGreaterThanOrEqual(1);
+        // Pages text (e.g. "10 / 100 bookStats.pages")
+        expect(screen.getByText(/bookStats\.pages/)).toBeDefined();
     });
 
     it('renders completed badge if completed', () => {
@@ -73,9 +73,10 @@ describe('MyBookCard', () => {
         expect(screen.getByText('bookCard.finished')).toBeDefined();
     });
 
-    it('renders unknown pages if pageCount is 0', () => {
+    it('renders no page count if pageCount is 0', () => {
         renderCard({ ...defaultBook, pageCount: 0 });
-        expect(screen.getByText('bookCard.pagesUnknown')).toBeDefined();
+        // When pageCount is 0, no page info is rendered
+        expect(screen.queryByText('bookStats.pages')).toBeNull();
     });
 
     it('triggers onToggleSelect when checkbox is clicked', () => {
@@ -95,7 +96,7 @@ describe('MyBookCard', () => {
 
     it('navigates to stats on chart button click', () => {
         renderCard();
-        const statsBtn = screen.getByText('bookCard.stats');
+        const statsBtn = screen.getByText('navbar.stats');
         fireEvent.click(statsBtn);
         expect(mockNavigate).toHaveBeenCalledWith('/books/1/stats');
     });

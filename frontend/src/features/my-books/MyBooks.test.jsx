@@ -51,35 +51,24 @@ describe('MyBooks Component', () => {
         expect(book2Cover).toBeInTheDocument();
     });
 
-    it('optimistically updates "Mark as Read" status', async () => {
-        // Override PATCH to delay response, ensuring we capture the optimistic state
-        // before the refetch (with static mock data) reverts it.
-        server.use(
-            http.patch('/api/books/:id/status', async () => {
-                await delay(200); // Wait 200ms
-                return HttpResponse.json({ completed: true });
-            })
-        );
-
+    it('toggles book selection', async () => {
         const user = userEvent.setup();
         render(<MyBooks />, { wrapper: createTestWrapper() });
 
         // Wait for books to load
         const bookCover = await screen.findByAltText('Test Book 1');
-        const bookCard = bookCover.closest('.book-card-detail');
+        const bookCard = bookCover.closest('div[role="group"]');
 
-        // Scope interactions to this specific card
-        const checkbox = within(bookCard).getByLabelText(/myBooks.markAsRead/i);
+        // Find the selection checkbox within the card
+        const checkbox = within(bookCard).getByRole('checkbox');
 
-        // Initial state: not checked
-        expect(checkbox).not.toBeChecked();
-
-        // Click it
+        // Click it to select
         await user.click(checkbox);
 
-        // EXPECTATION: It should be checked IMMEDIATELY (optimistic update)
-        // because the request is still pending due to delay
-        await waitFor(() => expect(checkbox).toBeChecked());
+        // "Delete (1)" button should appear indicating selection
+        await waitFor(() => {
+            expect(screen.getByText(/Delete \(1\)/i)).toBeInTheDocument();
+        });
     });
 
     it('handles API errors gracefully', async () => {

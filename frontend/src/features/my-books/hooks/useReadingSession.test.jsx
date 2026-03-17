@@ -12,7 +12,7 @@ vi.mock('../../../context/AuthContext', () => ({
 describe('useReadingSessionContext', () => {
     beforeEach(() => {
         global.fetch = vi.fn();
-        vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(mockToken);
+        localStorage.setItem('token', mockToken);
     });
 
     afterEach(() => {

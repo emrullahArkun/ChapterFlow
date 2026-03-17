@@ -9,10 +9,9 @@ vi.mock('react-i18next', () => ({
 }));
 
 describe('SearchForm', () => {
-    it('should render search input and button', () => {
+    it('should render search input', () => {
         render(<SearchForm query="" setQuery={vi.fn()} onSearch={vi.fn()} />);
         expect(screen.getByPlaceholderText('Suche nach Titel, Autor, ISBN...')).toBeDefined();
-        expect(screen.getByText('Suchen')).toBeDefined();
     });
 
     it('should call setQuery on input change', () => {
@@ -30,7 +29,7 @@ describe('SearchForm', () => {
         const onSearch = vi.fn((e) => e.preventDefault());
         render(<SearchForm query="test" setQuery={vi.fn()} onSearch={onSearch} />);
 
-        fireEvent.click(screen.getByText('Suchen'));
+        fireEvent.submit(screen.getByRole('textbox'));
 
         expect(onSearch).toHaveBeenCalledTimes(1);
     });
