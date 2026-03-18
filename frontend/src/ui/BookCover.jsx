@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
 import { Image, Center, Skeleton, Box } from '@chakra-ui/react';
-import { getHighResImage } from '../utils/googleBooks';
+import { getOpenLibraryCoverUrl } from '../utils/googleBooks';
 
 const BookCover = forwardRef(({
     book,
@@ -11,17 +11,18 @@ const BookCover = forwardRef(({
     ...props
 }, ref) => {
 
-
     // Normalized info access
-    // BookSearch uses book.volumeInfo, MyBooks uses top-level fields
+    // BookSearch uses flat fields, MyBooks uses top-level fields
     const info = book.volumeInfo || book;
-    const initialThumb = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || info.coverUrl;
     const title = info.title;
 
-    // Determine fallback URL from ISBN immediately
+    // Primary cover URL from the book data
+    const primaryUrl = info.coverUrl || '';
+
+    // Fallback URL from ISBN via OpenLibrary
     let fallbackUrl = '';
     const identifiers = info.industryIdentifiers || [];
-    let isbn = info.isbn; // MyBooks might have it top-level
+    let isbn = info.isbn;
 
     if (!isbn && identifiers.length > 0) {
         const isbn13 = identifiers.find(id => id.type === 'ISBN_13');
@@ -30,27 +31,11 @@ const BookCover = forwardRef(({
         else if (isbn10) isbn = isbn10.identifier;
     }
 
-    if (isbn && !isbn.startsWith('ID:')) {
-        const cleanIsbn = isbn.replace(/-/g, '');
-        if (cleanIsbn.length >= 10) {
-            fallbackUrl = `https://covers.openlibrary.org/b/isbn/${cleanIsbn}-L.jpg`;
-        }
+    if (isbn) {
+        fallbackUrl = getOpenLibraryCoverUrl(isbn);
     }
 
-    // Heuristic: If Google says "readingModes.image: false", the cover is likely a placeholder
-    const googleSaysNoImage = info.readingModes?.image === false;
-
-    // Skip Google URL entirely if Google says no image
-    const googleUrl = (!googleSaysNoImage && initialThumb) ? getHighResImage(initialThumb) : '';
-
-    // Determine the URL to use
-    let safeUrl = '';
-    if (googleUrl && !googleSaysNoImage) {
-        safeUrl = googleUrl;
-    } else if (fallbackUrl) {
-        safeUrl = fallbackUrl;
-    }
-    // If neither works, safeUrl stays empty and we show title/author fallback
+    const safeUrl = primaryUrl || fallbackUrl;
 
     const [imgSrc, setImgSrc] = useState(safeUrl);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -58,30 +43,21 @@ const BookCover = forwardRef(({
 
     // Only reset when the resolved URL actually changes
     useEffect(() => {
-        let newSafeUrl = '';
-        if (googleUrl && !googleSaysNoImage) {
-            newSafeUrl = googleUrl;
-        } else if (fallbackUrl) {
-            newSafeUrl = fallbackUrl;
-        }
+        const newSafeUrl = primaryUrl || fallbackUrl;
         if (newSafeUrl !== prevUrlRef.current) {
             prevUrlRef.current = newSafeUrl;
             setImgSrc(newSafeUrl);
             setImageLoaded(false);
         }
-    }, [googleSaysNoImage, googleUrl, fallbackUrl]);
+    }, [primaryUrl, fallbackUrl]);
 
     const handleImageError = () => {
-        if (imgSrc === fallbackUrl) {
-            // OpenLibrary failed - clear imgSrc to show text fallback
-            setImgSrc(''); // Show title/author fallback
+        if (imgSrc !== fallbackUrl && fallbackUrl) {
+            // Primary failed, try fallback
+            setImgSrc(fallbackUrl);
         } else {
-            // Google failed. Try OpenLibrary.
-            if (fallbackUrl && imgSrc !== fallbackUrl) {
-                setImgSrc(fallbackUrl);
-            } else {
-                setImgSrc(''); // Show title/author fallback
-            }
+            // All sources failed, show text fallback
+            setImgSrc('');
         }
         setImageLoaded(true);
     };
@@ -90,13 +66,6 @@ const BookCover = forwardRef(({
         const img = e.target;
         // OpenLibrary returns a tiny 1x1 pixel image when no cover exists
         if (img.naturalWidth < 10 || img.naturalHeight < 10) {
-            handleImageError();
-            return;
-        }
-        // Google "image not available" placeholders are ~128px wide at zoom=0;
-        // real covers are typically 300px+. Only apply to Google URLs.
-        const isGoogleUrl = imgSrc.includes('books.google');
-        if (isGoogleUrl && img.naturalWidth < 200) {
             handleImageError();
             return;
         }

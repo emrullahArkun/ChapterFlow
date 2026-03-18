@@ -6,6 +6,22 @@
     color: var(--neutral-50);
 }
 
+.titleWrapper {
+    overflow: hidden;
+    max-height: 80px;
+    opacity: 1;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease,
+                margin-bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 0;
+}
+
+.titleHidden {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+}
+
 /* Results Grid */
 .resultsGrid {
     display: grid;

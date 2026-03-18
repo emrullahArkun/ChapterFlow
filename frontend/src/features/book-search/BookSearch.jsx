@@ -61,7 +61,9 @@ function BookSearch({ onBookAdded }) {
     return (
         <div className={styles.searchContainer}>
             <div className={`${homeStyles.heroSection} ${hasResults ? homeStyles.compact : homeStyles.centered}`}>
-                <TypewriterTitle />
+                <div className={`${styles.titleWrapper} ${hasResults ? styles.titleHidden : ''}`}>
+                    <TypewriterTitle />
+                </div>
                 <SearchForm query={query} setQuery={setQuery} onSearch={searchBooks} />
             </div>
 

@@ -3,7 +3,7 @@ import { useToast } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { booksApi } from '../../books/api';
-import { getHighResImage, getOpenLibraryCoverUrl } from '../../../utils/googleBooks';
+import { getOpenLibraryCoverUrl } from '../../../utils/googleBooks';
 
 const TOAST_STYLE = {
     containerStyle: { marginTop: '80px' },
@@ -38,9 +38,7 @@ export const useAddBookToLibrary = () => {
             const isbn = book.isbn;
             if (!isbn) throw new Error(t('search.toast.noIsbn'));
 
-            const coverUrl = book.coverUrl
-                ? getHighResImage(book.coverUrl)
-                : getOpenLibraryCoverUrl(isbn);
+            const coverUrl = book.coverUrl || getOpenLibraryCoverUrl(isbn);
 
             const newBook = {
                 title: book.title,

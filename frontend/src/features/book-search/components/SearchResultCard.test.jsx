@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({
 
 // Mock googleBooks utils
 vi.mock('../../../utils/googleBooks', () => ({
-    getHighResImage: (url) => url,
+    getOpenLibraryCoverUrl: (isbn) => isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : '',
 }));
 
 describe('SearchResultCard', () => {

@@ -23,7 +23,7 @@ public class DiscoveryService {
 
     private final SearchHistoryRepository searchHistoryRepository;
     private final BookRepository bookRepository;
-    private final GoogleBooksClient googleBooksClient;
+    private final OpenLibraryClient openLibraryClient;
 
     @Transactional
     public void logSearch(String query, User user) {
@@ -83,20 +83,20 @@ public class DiscoveryService {
     }
 
     public List<RecommendedBookDto> getRecommendationsByAuthor(String author, Set<String> ownedIsbns, int maxResults) {
-        return filterOwnedBooks(googleBooksClient.getBooksByAuthor(author, maxResults), ownedIsbns);
+        return filterOwnedBooks(openLibraryClient.getBooksByAuthor(author, maxResults), ownedIsbns);
     }
 
     public List<RecommendedBookDto> getRecommendationsByCategory(String category, Set<String> ownedIsbns,
             int maxResults) {
-        return filterOwnedBooks(googleBooksClient.getBooksByCategory(category, maxResults), ownedIsbns);
+        return filterOwnedBooks(openLibraryClient.getBooksByCategory(category, maxResults), ownedIsbns);
     }
 
     public List<RecommendedBookDto> getRecommendationsByQuery(String query, Set<String> ownedIsbns, int maxResults) {
-        return filterOwnedBooks(googleBooksClient.getBooksByQuery(query, maxResults), ownedIsbns);
+        return filterOwnedBooks(openLibraryClient.getBooksByQuery(query, maxResults), ownedIsbns);
     }
 
     public SearchResultDto searchBooks(String query, Set<String> ownedIsbns, int startIndex, int maxResults) {
-        SearchResultDto result = googleBooksClient.searchBooks(query, startIndex, maxResults);
+        SearchResultDto result = openLibraryClient.searchBooks(query, startIndex, maxResults);
         List<RecommendedBookDto> filtered = filterOwnedBooks(result.items(), ownedIsbns);
         return new SearchResultDto(filtered, result.totalItems());
     }

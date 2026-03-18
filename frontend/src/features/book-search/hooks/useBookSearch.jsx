@@ -59,11 +59,12 @@ export const useBookSearch = () => {
             return discoveryApi.search(searchTerm.trim(), pageParam, 36);
         },
         getNextPageParam: (lastPage, allPages) => {
-            const loadedItems = allPages.flatMap(p => p.items || []).length;
-            if (loadedItems < (lastPage.totalItems || 0)) {
-                return loadedItems;
-            }
-            return undefined;
+            // Stop if last page returned no items (all filtered or truly exhausted)
+            if (!lastPage.items || lastPage.items.length === 0) return undefined;
+            // Use raw page offset for Google API (page count × page size)
+            const nextStart = allPages.length * 36;
+            if (nextStart >= (lastPage.totalItems || 0)) return undefined;
+            return nextStart;
         },
         enabled: !!searchTerm.trim(),
         initialPageParam: 0

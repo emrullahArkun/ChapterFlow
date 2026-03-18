@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { FaPlus, FaSpinner, FaBookOpen } from 'react-icons/fa';
+import { FaPlus, FaSpinner } from 'react-icons/fa';
 
 import styles from './SearchResultCard.module.css';
 import { useAnimation } from '../../../context/AnimationContext';
@@ -48,8 +48,6 @@ const SearchResultCard = ({ book, onAdd }) => {
                     book={book}
                     className={styles.coverImage}
                     borderRadius="12px"
-                    fallbackIconSize={48}
-                    fallbackIcon={FaBookOpen}
                     w="100%"
                     h="100%"
                 />

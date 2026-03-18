@@ -26,7 +26,7 @@ class DiscoveryServiceTest {
     @Mock
     private BookRepository bookRepository;
     @Mock
-    private GoogleBooksClient googleBooksClient;
+    private OpenLibraryClient openLibraryClient;
     @InjectMocks
     private DiscoveryService discoveryService;
 
@@ -125,7 +125,7 @@ class DiscoveryServiceTest {
         RecommendedBookDto book = new RecommendedBookDto(
                 "Book Title", List.of("Author"), null, null, 200, "isbn456", null);
 
-        when(googleBooksClient.getBooksByAuthor("Author", 5)).thenReturn(List.of(book));
+        when(openLibraryClient.getBooksByAuthor("Author", 5)).thenReturn(List.of(book));
 
         var result = discoveryService.getRecommendationsByAuthor("Author", ownedIsbns, 5);
         assertEquals(1, result.size());
@@ -139,7 +139,7 @@ class DiscoveryServiceTest {
         RecommendedBookDto book = new RecommendedBookDto(
                 "Owned Book", List.of("Author"), null, null, 200, "isbn123", null);
 
-        when(googleBooksClient.getBooksByAuthor("Author", 5)).thenReturn(List.of(book));
+        when(openLibraryClient.getBooksByAuthor("Author", 5)).thenReturn(List.of(book));
 
         var result = discoveryService.getRecommendationsByAuthor("Author", ownedIsbns, 5);
         assertEquals(0, result.size());
@@ -152,7 +152,7 @@ class DiscoveryServiceTest {
         RecommendedBookDto book = new RecommendedBookDto(
                 "Cat Book", null, null, null, null, null, null);
 
-        when(googleBooksClient.getBooksByCategory("Fiction", 5)).thenReturn(List.of(book));
+        when(openLibraryClient.getBooksByCategory("Fiction", 5)).thenReturn(List.of(book));
 
         var result = discoveryService.getRecommendationsByCategory("Fiction", ownedIsbns, 5);
         assertEquals(1, result.size());
@@ -165,7 +165,7 @@ class DiscoveryServiceTest {
         RecommendedBookDto book = new RecommendedBookDto(
                 "Search Book", null, null, null, null, null, null);
 
-        when(googleBooksClient.getBooksByQuery("Java", 5)).thenReturn(List.of(book));
+        when(openLibraryClient.getBooksByQuery("Java", 5)).thenReturn(List.of(book));
 
         var result = discoveryService.getRecommendationsByQuery("Java", ownedIsbns, 5);
         assertEquals(1, result.size());
