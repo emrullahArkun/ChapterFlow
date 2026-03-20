@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class ReadingSessionController {
 
     private final ReadingSessionService sessionService;
+    private final StreakService streakService;
 
     @PostMapping("/start")
     public ResponseEntity<ReadingSessionDto> startSession(
@@ -87,8 +88,8 @@ public class ReadingSessionController {
     @GetMapping("/streak")
     public ResponseEntity<Map<String, Integer>> getStreak(@CurrentUser User user) {
         return ResponseEntity.ok(Map.of(
-                "currentStreak", sessionService.calculateCurrentStreak(user),
-                "longestStreak", sessionService.calculateLongestStreak(user)
+                "currentStreak", streakService.calculateCurrentStreak(user),
+                "longestStreak", streakService.calculateLongestStreak(user)
         ));
     }
 
@@ -99,7 +100,9 @@ public class ReadingSessionController {
                 session.getStartTime(),
                 session.getEndTime(),
                 session.getStatus(),
+                session.getStartPage(),
                 session.getEndPage(),
+                session.getPagesRead(),
                 session.getPausedMillis(),
                 session.getPausedAt());
     }

@@ -5,7 +5,7 @@ import com.example.readflow.books.Book;
 import com.example.readflow.books.BookRepository;
 import com.example.readflow.sessions.ReadingSession;
 import com.example.readflow.sessions.ReadingSessionRepository;
-import com.example.readflow.sessions.ReadingSessionService;
+import com.example.readflow.sessions.StreakService;
 import com.example.readflow.sessions.SessionStatus;
 import com.example.readflow.stats.dto.AchievementDto;
 import com.example.readflow.stats.dto.StatsOverviewDto;
@@ -32,7 +32,7 @@ class StatsServiceTest {
 
     @Mock private BookRepository bookRepository;
     @Mock private ReadingSessionRepository sessionRepository;
-    @Mock private ReadingSessionService sessionService;
+    @Mock private StreakService streakService;
     @InjectMocks private StatsService statsService;
 
     private User user;
@@ -68,8 +68,8 @@ class StatsServiceTest {
                         buildSession(LocalDate.now(), 50, 14)));
         when(bookRepository.findAllCategoriesByUser(user))
                 .thenReturn(List.of("Thriller, Krimi", "Thriller"));
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(3);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(7);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(3);
+        when(streakService.calculateLongestStreak(user)).thenReturn(7);
 
         StatsOverviewDto result = statsService.getOverview(user);
 
@@ -92,8 +92,8 @@ class StatsServiceTest {
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findAllCategoriesByUser(user)).thenReturn(Collections.emptyList());
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
 
         StatsOverviewDto result = statsService.getOverview(user);
 
@@ -114,8 +114,8 @@ class StatsServiceTest {
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(noPages));
         when(bookRepository.findAllCategoriesByUser(user)).thenReturn(Collections.emptyList());
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
 
         StatsOverviewDto result = statsService.getOverview(user);
         assertTrue(result.dailyActivity().isEmpty());
@@ -137,8 +137,8 @@ class StatsServiceTest {
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(noEnd));
         when(bookRepository.findAllCategoriesByUser(user)).thenReturn(Collections.emptyList());
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
 
         StatsOverviewDto result = statsService.getOverview(user);
         assertEquals(0, result.totalReadingMinutes());
@@ -155,8 +155,8 @@ class StatsServiceTest {
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(s));
         when(bookRepository.findAllCategoriesByUser(user)).thenReturn(Collections.emptyList());
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
 
         StatsOverviewDto result = statsService.getOverview(user);
         assertEquals(30, result.totalReadingMinutes()); // 60min - 30min paused
@@ -171,8 +171,8 @@ class StatsServiceTest {
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findAllCategoriesByUser(user)).thenReturn(cats);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
 
         StatsOverviewDto result = statsService.getOverview(user);
         assertTrue(result.genreDistribution().size() <= 8);
@@ -189,8 +189,8 @@ class StatsServiceTest {
         catsWithNull.add(null);
         catsWithNull.add("Fiction");
         when(bookRepository.findAllCategoriesByUser(user)).thenReturn(catsWithNull);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
 
         StatsOverviewDto result = statsService.getOverview(user);
         assertEquals(1, result.genreDistribution().size());
@@ -205,8 +205,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(0L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(0L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -222,8 +222,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(30L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(1L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(1);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(1);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(1);
+        when(streakService.calculateLongestStreak(user)).thenReturn(1);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 30, 10)));
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -240,8 +240,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(5);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(1500L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(20L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(3);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(8);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(3);
+        when(streakService.calculateLongestStreak(user)).thenReturn(8);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 50, 10)));
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -258,8 +258,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(120L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(2L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(1);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(1);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(1);
+        when(streakService.calculateLongestStreak(user)).thenReturn(1);
         // Two sessions on same day = 120 pages total
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(
@@ -279,8 +279,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(10L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(1L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 10, 6))); // 6 AM
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -297,8 +297,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(10L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(1L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 10, 23))); // 11 PM
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -315,8 +315,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(10L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(1L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 10, 1))); // 1 AM
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -333,8 +333,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(100L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(7L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(7);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(7);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(7);
+        when(streakService.calculateLongestStreak(user)).thenReturn(7);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -355,8 +355,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(1);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(200L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(5L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findByUser(user)).thenReturn(List.of(fastBook));
@@ -377,8 +377,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(50L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(2L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findByUser(user)).thenReturn(List.of(notDone));
@@ -399,8 +399,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(1);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(200L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(5L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findByUser(user)).thenReturn(List.of(slowBook));
@@ -425,8 +425,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(0);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(10L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(1L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(List.of(noStart));
         when(bookRepository.findByUser(user)).thenReturn(Collections.emptyList());
@@ -448,8 +448,8 @@ class StatsServiceTest {
         when(bookRepository.countCompletedByUser(user)).thenReturn(1);
         when(sessionRepository.sumPagesReadByUser(user)).thenReturn(200L);
         when(sessionRepository.countCompletedByUser(user)).thenReturn(5L);
-        when(sessionService.calculateCurrentStreak(user)).thenReturn(0);
-        when(sessionService.calculateLongestStreak(user)).thenReturn(0);
+        when(streakService.calculateCurrentStreak(user)).thenReturn(0);
+        when(streakService.calculateLongestStreak(user)).thenReturn(0);
         when(sessionRepository.findCompletedSessionsSince(eq(user), any()))
                 .thenReturn(Collections.emptyList());
         when(bookRepository.findByUser(user)).thenReturn(List.of(noDate));
