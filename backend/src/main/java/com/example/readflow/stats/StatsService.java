@@ -5,14 +5,14 @@ import com.example.readflow.books.Book;
 import com.example.readflow.books.BookRepository;
 import com.example.readflow.sessions.ReadingSession;
 import com.example.readflow.sessions.ReadingSessionRepository;
-import com.example.readflow.sessions.ReadingSessionService;
+import com.example.readflow.sessions.StreakService;
 import com.example.readflow.stats.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,22 +22,22 @@ public class StatsService {
 
     private final BookRepository bookRepository;
     private final ReadingSessionRepository sessionRepository;
-    private final ReadingSessionService sessionService;
+    private final StreakService streakService;
 
     public StatsOverviewDto getOverview(User user) {
         int totalBooks = bookRepository.countByUser(user);
         int completedBooks = bookRepository.countCompletedByUser(user);
         long totalPagesRead = sessionRepository.sumPagesReadByUser(user);
 
-        LocalDate since = LocalDate.now().minusYears(1);
+        LocalDate since = LocalDate.now(ZoneOffset.UTC).minusYears(1);
         List<ReadingSession> sessions = sessionRepository.findCompletedSessionsSince(user, since);
 
         long totalReadingMinutes = calculateTotalMinutes(sessions);
         List<DailyActivityDto> dailyActivity = buildDailyActivity(sessions);
         List<GenreStatDto> genreDistribution = buildGenreDistribution(user);
 
-        int currentStreak = sessionService.calculateCurrentStreak(user);
-        int longestStreak = sessionService.calculateLongestStreak(user);
+        int currentStreak = streakService.calculateCurrentStreak(user);
+        int longestStreak = streakService.calculateLongestStreak(user);
 
         return new StatsOverviewDto(
                 totalBooks, completedBooks, totalPagesRead, totalReadingMinutes,
@@ -49,10 +49,10 @@ public class StatsService {
         int completedBooks = bookRepository.countCompletedByUser(user);
         long totalPages = sessionRepository.sumPagesReadByUser(user);
         long totalSessions = sessionRepository.countCompletedByUser(user);
-        int currentStreak = sessionService.calculateCurrentStreak(user);
-        int longestStreak = sessionService.calculateLongestStreak(user);
+        int currentStreak = streakService.calculateCurrentStreak(user);
+        int longestStreak = streakService.calculateLongestStreak(user);
 
-        LocalDate since = LocalDate.now().minusYears(1);
+        LocalDate since = LocalDate.now(ZoneOffset.UTC).minusYears(1);
         List<ReadingSession> sessions = sessionRepository.findCompletedSessionsSince(user, since);
 
         int maxDailyPages = getMaxDailyPages(sessions);
@@ -114,7 +114,7 @@ public class StatsService {
         Map<LocalDate, Integer> dayMap = new TreeMap<>();
         for (ReadingSession s : sessions) {
             if (s.getEndTime() != null && s.getPagesRead() != null && s.getPagesRead() > 0) {
-                LocalDate day = s.getEndTime().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate day = s.getEndTime().atZone(ZoneOffset.UTC).toLocalDate();
                 dayMap.merge(day, s.getPagesRead(), Integer::sum);
             }
         }
@@ -146,7 +146,7 @@ public class StatsService {
         Map<LocalDate, Integer> dayMap = new HashMap<>();
         for (ReadingSession s : sessions) {
             if (s.getEndTime() != null && s.getPagesRead() != null && s.getPagesRead() > 0) {
-                LocalDate day = s.getEndTime().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate day = s.getEndTime().atZone(ZoneOffset.UTC).toLocalDate();
                 dayMap.merge(day, s.getPagesRead(), Integer::sum);
             }
         }
@@ -156,7 +156,7 @@ public class StatsService {
     private boolean hasSessionInHourRange(List<ReadingSession> sessions, int fromHour, int toHour) {
         for (ReadingSession s : sessions) {
             if (s.getStartTime() == null) continue;
-            int hour = s.getStartTime().atZone(ZoneId.systemDefault()).getHour();
+            int hour = s.getStartTime().atZone(ZoneOffset.UTC).getHour();
             if (toHour > 24) {
                 // Wraps past midnight (e.g. 22-03)
                 if (hour >= fromHour || hour < (toHour - 24)) return true;
@@ -173,7 +173,7 @@ public class StatsService {
             if (Boolean.TRUE.equals(b.getCompleted()) && b.getStartDate() != null) {
                 long days = Duration.between(
                         b.getStartDate().atStartOfDay(),
-                        LocalDate.now().atStartOfDay()).toDays();
+                        LocalDate.now(ZoneOffset.UTC).atStartOfDay()).toDays();
                 if (days <= 7) return true;
             }
         }

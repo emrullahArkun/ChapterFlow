@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +46,7 @@ public class ReadingSessionService {
         session.setUser(user);
         session.setBook(book);
         session.setStartTime(Instant.now());
+        session.setStartPage(book.getCurrentPage() != null ? book.getCurrentPage() : 0);
         session.setStatus(SessionStatus.ACTIVE);
 
         return sessionRepository.save(session);
@@ -68,16 +68,12 @@ public class ReadingSessionService {
         session.setStatus(SessionStatus.COMPLETED);
 
         if (endPage != null) {
-            Book book = session.getBook();
-
-            int startPage = book.getCurrentPage() != null ? book.getCurrentPage() : 0;
-            int pagesRead = endPage - startPage;
-            if (pagesRead < 0)
-                pagesRead = 0;
+            int sessionStartPage = session.getStartPage() != null ? session.getStartPage() : 0;
+            int pagesRead = Math.max(0, endPage - sessionStartPage);
 
             session.setPagesRead(pagesRead);
 
-            bookProgressService.updateProgress(book, endPage);
+            bookProgressService.updateProgress(session.getBook(), endPage);
         }
 
         return sessionRepository.save(session);
@@ -134,53 +130,6 @@ public class ReadingSessionService {
     @Transactional
     public void deleteSessionsByBook(User user, Book book) {
         sessionRepository.deleteByUserAndBook(user, book);
-    }
-
-    public int calculateCurrentStreak(User user) {
-        List<LocalDate> readingDays = sessionRepository.findDistinctReadingDays(
-                user, LocalDate.now().minusYears(1));
-
-        if (readingDays.isEmpty()) return 0;
-
-        int streak = 0;
-        LocalDate expected = LocalDate.now();
-
-        // If no session today, start from yesterday
-        if (!readingDays.contains(expected)) {
-            expected = expected.minusDays(1);
-        }
-
-        for (LocalDate day : readingDays) {
-            if (day.equals(expected)) {
-                streak++;
-                expected = expected.minusDays(1);
-            } else if (day.isBefore(expected)) {
-                break;
-            }
-        }
-
-        return streak;
-    }
-
-    public int calculateLongestStreak(User user) {
-        List<LocalDate> readingDays = sessionRepository.findDistinctReadingDays(
-                user, LocalDate.now().minusYears(1));
-
-        if (readingDays.isEmpty()) return 0;
-
-        // readingDays is DESC sorted, reverse for consecutive check
-        int longest = 1;
-        int current = 1;
-        for (int i = readingDays.size() - 2; i >= 0; i--) {
-            if (readingDays.get(i).minusDays(1).equals(readingDays.get(i + 1))) {
-                current++;
-                longest = Math.max(longest, current);
-            } else {
-                current = 1;
-            }
-        }
-
-        return longest;
     }
 
     private void accumulatePausedTime(ReadingSession session, Instant endTime) {

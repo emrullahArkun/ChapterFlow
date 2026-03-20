@@ -188,9 +188,10 @@ class ReadingSessionServiceTest {
 
     @Test
     void stopSession_ShouldHandleNegativePagesRead() {
-        book.setCurrentPage(100); // Start page higher than end page
+        book.setCurrentPage(100);
         ReadingSession session = new ReadingSession();
         session.setBook(book);
+        session.setStartPage(100); // Session recorded start page at 100
         session.setStatus(SessionStatus.ACTIVE);
         when(sessionRepository.findFirstByUserAndStatusInOrderByStartTimeDesc(eq(user), anyList()))
                 .thenReturn(Optional.of(session));
@@ -389,81 +390,4 @@ class ReadingSessionServiceTest {
         verify(sessionRepository).deleteByUserAndBook(user, book);
     }
 
-    // --- calculateCurrentStreak ---
-
-    @Test
-    void calculateCurrentStreak_ShouldReturnZero_WhenNoReadingDays() {
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-
-        assertEquals(0, sessionService.calculateCurrentStreak(user));
-    }
-
-    @Test
-    void calculateCurrentStreak_ShouldCountConsecutiveDays_IncludingToday() {
-        LocalDate today = LocalDate.now();
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(List.of(today, today.minusDays(1), today.minusDays(2)));
-
-        assertEquals(3, sessionService.calculateCurrentStreak(user));
-    }
-
-    @Test
-    void calculateCurrentStreak_ShouldCountFromYesterday_WhenNoSessionToday() {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(List.of(yesterday, yesterday.minusDays(1)));
-
-        assertEquals(2, sessionService.calculateCurrentStreak(user));
-    }
-
-    @Test
-    void calculateCurrentStreak_ShouldBreakOnGap() {
-        LocalDate today = LocalDate.now();
-        // Gap: today, yesterday, then skip a day
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(List.of(today, today.minusDays(1), today.minusDays(3)));
-
-        assertEquals(2, sessionService.calculateCurrentStreak(user));
-    }
-
-    @Test
-    void calculateCurrentStreak_ShouldReturnZero_WhenLastReadingWasTwoDaysAgo() {
-        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(List.of(twoDaysAgo));
-
-        assertEquals(0, sessionService.calculateCurrentStreak(user));
-    }
-
-    // --- calculateLongestStreak ---
-
-    @Test
-    void calculateLongestStreak_ShouldReturnZero_WhenNoReadingDays() {
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-
-        assertEquals(0, sessionService.calculateLongestStreak(user));
-    }
-
-    @Test
-    void calculateLongestStreak_ShouldFindLongestConsecutiveRun() {
-        LocalDate today = LocalDate.now();
-        // Two streaks: 3 days and 2 days with a gap between
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(List.of(
-                        today, today.minusDays(1),  // 2-day streak
-                        today.minusDays(5), today.minusDays(6), today.minusDays(7) // 3-day streak
-                ));
-
-        assertEquals(3, sessionService.calculateLongestStreak(user));
-    }
-
-    @Test
-    void calculateLongestStreak_ShouldReturnOne_WhenSingleDay() {
-        when(sessionRepository.findDistinctReadingDays(eq(user), any(LocalDate.class)))
-                .thenReturn(List.of(LocalDate.now()));
-
-        assertEquals(1, sessionService.calculateLongestStreak(user));
-    }
 }

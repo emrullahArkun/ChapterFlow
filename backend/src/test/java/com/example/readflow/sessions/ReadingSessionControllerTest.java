@@ -34,6 +34,9 @@ class ReadingSessionControllerTest {
     @Mock
     private ReadingSessionService sessionService;
 
+    @Mock
+    private StreakService streakService;
+
     @InjectMocks
     private ReadingSessionController sessionController;
 
@@ -145,8 +148,8 @@ class ReadingSessionControllerTest {
 
     @Test
     void getStreak_ShouldReturnStreakData() throws Exception {
-        when(sessionService.calculateCurrentStreak(any())).thenReturn(5);
-        when(sessionService.calculateLongestStreak(any())).thenReturn(12);
+        when(streakService.calculateCurrentStreak(any())).thenReturn(5);
+        when(streakService.calculateLongestStreak(any())).thenReturn(12);
 
         mockMvc.perform(get("/api/sessions/streak"))
                 .andExpect(status().isOk())
