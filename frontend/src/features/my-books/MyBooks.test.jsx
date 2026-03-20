@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthContext } from '../../context/AuthContext';
 import { ReadingSessionProvider } from '../../context/ReadingSessionContext';
@@ -44,6 +44,10 @@ const createTestWrapper = () => {
 };
 
 describe('MyBooks Component', () => {
+    beforeEach(() => {
+        mockNavigate.mockClear();
+    });
+
     it('shows loading state initially', () => {
         render(<MyBooks />, { wrapper: createTestWrapper() });
         expect(screen.getByText(/Loading library.../i)).toBeInTheDocument();
@@ -226,13 +230,16 @@ describe('MyBooks Component', () => {
         });
 
         it('handles very narrow window where columns would be less than 1', async () => {
-            // Set a width so narrow that Math.floor gives 0 columns
-            window.innerWidth = 50;
-            render(<MyBooks />, { wrapper: createTestWrapper() });
-
-            window.dispatchEvent(new Event('resize'));
-
-            expect(await screen.findByAltText('Test Book 1')).toBeInTheDocument();
+            const originalInnerWidth = window.innerWidth;
+            try {
+                window.innerWidth = 50;
+                render(<MyBooks />, { wrapper: createTestWrapper() });
+                window.dispatchEvent(new Event('resize'));
+                expect(await screen.findByAltText('Test Book 1')).toBeInTheDocument();
+            } finally {
+                window.innerWidth = originalInnerWidth;
+                window.dispatchEvent(new Event('resize'));
+            }
         });
 
         it('shows and handles pagination buttons', async () => {
