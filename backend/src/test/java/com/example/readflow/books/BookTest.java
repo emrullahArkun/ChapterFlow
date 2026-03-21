@@ -134,6 +134,6 @@ class BookTest {
         assertEquals("author", book.getAuthor());
         assertEquals(user, book.getUser());
         assertEquals(ReadingGoalType.WEEKLY, book.getReadingGoalType());
-        assertEquals("Fiction", book.getCategories());
+        assertEquals(List.of("Fiction"), book.getCategories());
     }
 }
