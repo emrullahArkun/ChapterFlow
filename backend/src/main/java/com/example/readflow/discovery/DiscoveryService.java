@@ -139,14 +139,26 @@ public class DiscoveryService {
 
         // Nur die langsamen externen API-Aufrufe parallelisieren
         CompletableFuture<List<RecommendedBookDto>> authorBooksFuture = CompletableFuture.supplyAsync(() ->
-                selectedAuthor == null ? Collections.emptyList()
-                        : getRecommendationsByAuthor(selectedAuthor, ownedIsbns, MAX_RESULTS));
+                selectedAuthor == null ? Collections.<RecommendedBookDto>emptyList()
+                        : getRecommendationsByAuthor(selectedAuthor, ownedIsbns, MAX_RESULTS))
+                .exceptionally(e -> {
+                    log.error("Failed to fetch author recommendations for {}: {}", selectedAuthor, e.getMessage());
+                    return Collections.emptyList();
+                });
         CompletableFuture<List<RecommendedBookDto>> categoryBooksFuture = CompletableFuture.supplyAsync(() ->
-                selectedCategory == null ? Collections.emptyList()
-                        : getRecommendationsByCategory(selectedCategory, ownedIsbns, MAX_RESULTS));
+                selectedCategory == null ? Collections.<RecommendedBookDto>emptyList()
+                        : getRecommendationsByCategory(selectedCategory, ownedIsbns, MAX_RESULTS))
+                .exceptionally(e -> {
+                    log.error("Failed to fetch category recommendations for {}: {}", selectedCategory, e.getMessage());
+                    return Collections.emptyList();
+                });
         CompletableFuture<List<RecommendedBookDto>> searchBooksFuture = CompletableFuture.supplyAsync(() ->
-                selectedSearch == null ? Collections.emptyList()
-                        : getRecommendationsByQuery(selectedSearch, ownedIsbns, MAX_RESULTS));
+                selectedSearch == null ? Collections.<RecommendedBookDto>emptyList()
+                        : getRecommendationsByQuery(selectedSearch, ownedIsbns, MAX_RESULTS))
+                .exceptionally(e -> {
+                    log.error("Failed to fetch search recommendations for {}: {}", selectedSearch, e.getMessage());
+                    return Collections.emptyList();
+                });
 
         CompletableFuture.allOf(authorBooksFuture, categoryBooksFuture, searchBooksFuture).join();
 

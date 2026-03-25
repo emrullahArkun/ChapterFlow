@@ -9,8 +9,6 @@ import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
@@ -69,10 +67,13 @@ public class ReadingGoalProgressCalculator {
 
     private Instant getStartOfPeriod(ReadingGoalType goalType) {
         LocalDate now = LocalDate.now(clock);
-        LocalDateTime startOfPeriod = switch (goalType) {
-            case WEEKLY -> now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay();
-            case MONTHLY -> now.withDayOfMonth(1).atStartOfDay();
+        return switch (goalType) {
+            case WEEKLY -> now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    .atStartOfDay(clock.getZone())
+                    .toInstant();
+            case MONTHLY -> now.withDayOfMonth(1)
+                    .atStartOfDay(clock.getZone())
+                    .toInstant();
         };
-        return startOfPeriod.atZone(ZoneOffset.UTC).toInstant();
     }
 }

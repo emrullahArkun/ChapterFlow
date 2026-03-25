@@ -59,7 +59,19 @@ public class StatsService {
         int maxDailyPages = dailyPagesMap.values().stream().mapToInt(Integer::intValue).max().orElse(0);
         boolean hasEarlySession = hasSessionInHourRange(sessions, 5, 8);
         boolean hasLateSession = hasSessionInHourRange(sessions, 22, 28); // 22-03 next day
-        boolean hasSpeedRead = bookRepository.existsSpeedReadBook(user, LocalDate.now(ZoneOffset.UTC).minusDays(7));
+        boolean hasSpeedRead = false;
+        for (ReadingSession s : sessions) {
+            com.example.readflow.books.Book b = s.getBook();
+            if (b != null && Boolean.TRUE.equals(b.getCompleted()) && b.getStartDate() != null && b.getPageCount() != null && b.getPageCount() > 0 && s.getEndTime() != null) {
+                LocalDate completedDay = s.getEndTime().atZone(ZoneOffset.UTC).toLocalDate();
+                long days = java.time.temporal.ChronoUnit.DAYS.between(b.getStartDate(), completedDay);
+                days = Math.max(1, days);
+                if ((double) b.getPageCount() / days >= 50.0) {
+                    hasSpeedRead = true;
+                    break;
+                }
+            }
+        }
 
         List<AchievementDto> achievements = new ArrayList<>();
 

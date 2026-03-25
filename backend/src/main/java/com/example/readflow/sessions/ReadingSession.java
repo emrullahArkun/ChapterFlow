@@ -88,6 +88,9 @@ public class ReadingSession {
     }
 
     public void finish(Instant now, Integer endPage) {
+        if (this.status != SessionStatus.ACTIVE && this.status != SessionStatus.PAUSED) {
+            throw new IllegalStateException("Only active or paused sessions can be finished.");
+        }
         if (this.status == SessionStatus.PAUSED && this.pausedAt != null) {
             long gap = Duration.between(this.pausedAt, now).toMillis();
             if (gap > 0) {
@@ -106,6 +109,9 @@ public class ReadingSession {
     }
 
     public void addExcludedTime(long millis) {
+        if (millis <= 0) {
+            throw new IllegalArgumentException("Excluded time must be positive.");
+        }
         this.pausedMillis = getPausedMillisOrZero() + millis;
     }
 

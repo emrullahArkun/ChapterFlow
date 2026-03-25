@@ -256,7 +256,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(Collections.emptyList());
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         assertEquals(10, result.size());
@@ -272,7 +271,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(1, 1));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 30, 10)));
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto firstSession = result.stream()
@@ -289,7 +287,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(3, 8));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 50, 10)));
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto bookworm = result.stream()
@@ -309,7 +306,6 @@ class StatsServiceTest {
                 .thenReturn(List.of(
                         buildSession(LocalDate.now(), 60, 10),
                         buildSession(LocalDate.now(), 60, 14)));
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto marathon = result.stream()
@@ -326,7 +322,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 10, 6))); // 6 AM
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto earlyBird = result.stream()
@@ -343,7 +338,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 10, 23))); // 11 PM
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto nightOwl = result.stream()
@@ -360,7 +354,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(List.of(buildSession(LocalDate.now(), 10, 1))); // 1 AM
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto nightOwl = result.stream()
@@ -377,7 +370,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(7, 7));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(Collections.emptyList());
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto weekStreak = result.stream()
@@ -392,9 +384,15 @@ class StatsServiceTest {
         when(sessionRepository.sumPagesReadByUser(user, SessionStatus.COMPLETED)).thenReturn(200L);
         when(sessionRepository.countCompletedByUser(user, SessionStatus.COMPLETED)).thenReturn(5L);
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
+        ReadingSession fastSession = buildSession(LocalDate.now(), 200, 10);
+        com.example.readflow.books.Book b = new com.example.readflow.books.Book();
+        b.setCompleted(true);
+        b.setStartDate(LocalDate.now().minusDays(2));
+        b.setPageCount(200);
+        fastSession.setBook(b);
+
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
-                .thenReturn(Collections.emptyList());
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(true);
+                .thenReturn(List.of(fastSession));
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto speed = result.stream()
@@ -411,7 +409,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(Collections.emptyList());
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto speed = result.stream()
@@ -428,7 +425,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(Collections.emptyList());
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto lib = result.stream()
@@ -445,7 +441,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(Collections.emptyList());
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto pt = result.stream()
@@ -462,7 +457,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(30, 30));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(Collections.emptyList());
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         AchievementDto monthStreak = result.stream()
@@ -487,7 +481,6 @@ class StatsServiceTest {
         when(streakService.calculateStreaks(user)).thenReturn(new StreakService.StreakInfo(0, 0));
         when(sessionRepository.findCompletedSessionsSince(eq(user), any(), eq(SessionStatus.COMPLETED)))
                 .thenReturn(List.of(noStart));
-        when(bookRepository.existsSpeedReadBook(eq(user), any(LocalDate.class))).thenReturn(false);
 
         List<AchievementDto> result = statsService.getAchievements(user);
         // Should not crash, early bird/night owl should not be unlocked
