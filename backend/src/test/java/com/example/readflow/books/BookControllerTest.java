@@ -111,12 +111,65 @@ class BookControllerTest {
         }
 
         @Test
+        void getAllBooks_ShouldIncludeProgress_WhenCalculated() throws Exception {
+                Book book = new Book();
+                book.setId(1L);
+                List<Book> books = new java.util.ArrayList<>(List.of(book));
+                Page<Book> page = new PageImpl<>(books);
+
+                when(bookService.findAllByUser(any(), any(Pageable.class))).thenReturn(page);
+                when(progressCalculator.calculateProgressBatch(anyList())).thenReturn(Map.of(1L, 40));
+                when(bookMapper.toDto(any(Book.class))).thenReturn(
+                                new BookDto(1L, "isbn", "title", "author", 2023, "url", 100, 0, null, false, null,
+                                                null, null, null));
+
+                mockMvc.perform(get("/api/books")
+                                .param("page", "0")
+                                .param("size", "10"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.content[0].id").value(1))
+                                .andExpect(jsonPath("$.content[0].readingGoalProgress").value(40));
+        }
+
+        @Test
         void getAllOwnedIsbns_ShouldReturnList() throws Exception {
                 when(bookService.getAllOwnedIsbns(any())).thenReturn(List.of("123"));
 
                 mockMvc.perform(get("/api/books/owned"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0]").value("123"));
+        }
+
+        @Test
+        void getBooksWithGoals_ShouldReturnBooks() throws Exception {
+                Book book = new Book();
+                book.setId(1L);
+                when(bookService.findBooksWithGoals(any())).thenReturn(List.of(book));
+                when(progressCalculator.calculateProgressBatch(anyList())).thenReturn(Map.of());
+                when(bookMapper.toDto(any(Book.class))).thenReturn(
+                                new BookDto(1L, "isbn", "title", "author", 2023, "url", 100, 0, null, false, null,
+                                                null, null, null));
+
+                mockMvc.perform(get("/api/books/with-goals"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].id").value(1))
+                                .andExpect(jsonPath("$[0].readingGoalProgress").doesNotExist());
+        }
+
+        @Test
+        void getBooksWithGoals_ShouldIncludeProgress_WhenCalculated() throws Exception {
+                Book book = new Book();
+                book.setId(1L);
+                when(bookService.findBooksWithGoals(any())).thenReturn(List.of(book));
+                when(progressCalculator.calculateProgressBatch(anyList())).thenReturn(Map.of(1L, 75));
+                when(bookMapper.toDto(any(Book.class))).thenReturn(
+                                new BookDto(1L, "isbn", "title", "author", 2023, "url", 100, 0, null, false, null,
+                                                null, null, null));
+
+                mockMvc.perform(get("/api/books/with-goals"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].id").value(1))
+                                .andExpect(jsonPath("$[0].readingGoalProgress").value(75));
         }
 
         @Test
@@ -130,6 +183,22 @@ class BookControllerTest {
                 mockMvc.perform(get("/api/books/1"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.id").value(1));
+        }
+
+        @Test
+        void getBookById_ShouldIncludeProgress_WhenCalculated() throws Exception {
+                Book book = new Book();
+                book.setId(1L);
+                when(bookService.getBookByIdOrThrow(eq(1L), any())).thenReturn(book);
+                when(progressCalculator.calculateProgress(book)).thenReturn(60);
+                when(bookMapper.toDto(book)).thenReturn(
+                                new BookDto(1L, "isbn", "title", "author", 2023, "url", 100, 0, null, false, null,
+                                                null, null, null));
+
+                mockMvc.perform(get("/api/books/1"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(1))
+                                .andExpect(jsonPath("$.readingGoalProgress").value(60));
         }
 
         @Test

@@ -280,4 +280,23 @@ class OpenLibraryClientTest {
         openLibraryClient.getBooksByQuery("test", 5);
         mockServer.verify();
     }
+
+    @Test
+    void searchBooks_ShouldReturnEmpty_WhenResponseIsNull() {
+        mockServer.expect(requestTo(org.hamcrest.Matchers.startsWith("https://openlibrary.org/search.json")))
+                .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+        SearchResultDto result = openLibraryClient.searchBooks("test", 0, 10);
+        assertTrue(result.items().isEmpty());
+        assertEquals(0, result.totalItems());
+    }
+
+    @Test
+    void fetchBooks_ShouldReturnEmpty_WhenResponseIsNull() {
+        mockServer.expect(requestTo(org.hamcrest.Matchers.startsWith("https://openlibrary.org/search.json")))
+                .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+        var result = openLibraryClient.getBooksByAuthor("Author", 10);
+        assertTrue(result.isEmpty());
+    }
 }
