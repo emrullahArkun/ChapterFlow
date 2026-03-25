@@ -146,19 +146,27 @@ class ReadingSessionControllerIntegrationTest {
                                                                 testBook.getId()))))
                                 .andExpect(status().isCreated());
 
-                var stopRequest = new com.example.readflow.sessions.dto.StopSessionRequest(Instant.now(), 50);
+                Instant fixedEndTime = Instant.parse("2026-03-25T14:30:00Z");
+                var stopRequest = new com.example.readflow.sessions.dto.StopSessionRequest(fixedEndTime, 50);
                 mockMvc.perform(post("/api/sessions/stop")
                                 .with(jwtForUser()).with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(stopRequest)))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.status", is("COMPLETED")))
-                                .andExpect(jsonPath("$.endTime", notNullValue()))
+                                .andExpect(jsonPath("$.endTime", is("2026-03-25T14:30:00Z")))
                                 .andExpect(jsonPath("$.endPage", is(50)));
 
                 Book updatedBook = bookRepository.findById(testBook.getId()).orElseThrow();
                 assertEquals(50, updatedBook.getCurrentPage());
                 assertEquals(false, updatedBook.getCompleted());
+
+                ReadingSession stoppedSession = sessionRepository
+                                .findFirstByUserAndStatusInOrderByStartTimeDesc(testUser,
+                                                java.util.List.of(SessionStatus.COMPLETED))
+                                .orElseThrow();
+                assertEquals(fixedEndTime, stoppedSession.getEndTime());
+                assertEquals(50, stoppedSession.getEndPage());
         }
 
         @Test

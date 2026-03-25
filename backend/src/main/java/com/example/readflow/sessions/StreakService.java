@@ -4,6 +4,7 @@ import com.example.readflow.auth.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -15,6 +16,7 @@ import java.util.List;
 public class StreakService {
 
     private final ReadingSessionRepository sessionRepository;
+    private final Clock clock;
 
     public record StreakInfo(int current, int longest) {}
 
@@ -23,7 +25,7 @@ public class StreakService {
     }
 
     public StreakInfo calculateStreaks(User user, ZoneId zoneId) {
-        LocalDate today = LocalDate.now(zoneId);
+        LocalDate today = LocalDate.now(clock.withZone(zoneId));
 
         List<LocalDate> readingDays = sessionRepository
                 .findAllCompletedEndTimes(user, SessionStatus.COMPLETED)
