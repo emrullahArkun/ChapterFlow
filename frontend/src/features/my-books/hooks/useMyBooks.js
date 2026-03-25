@@ -141,6 +141,8 @@ export const useMyBooks = () => {
         updateStatusMutation.mutate({ id, completed });
     };
 
+    const deleteError = deleteSelectedMutation.error ?? deleteAllMutation.error ?? deleteMutation.error;
+
     return {
         books,
         loading,
@@ -155,7 +157,7 @@ export const useMyBooks = () => {
         page,
         setPage,
         totalPages,
-        deleteError: deleteMutation.error,
+        deleteError,
         updateProgressError: updateProgressMutation.error
     };
 };

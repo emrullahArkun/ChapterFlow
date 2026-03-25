@@ -14,6 +14,7 @@ export const useBookSearch = () => {
 
     // Track last logged query to prevent duplicates
     const lastLoggedQuery = useRef('');
+    const lastLogRequestId = useRef(0);
 
     // Log search when user actively submits (searchTerm changes)
     useEffect(() => {
@@ -21,8 +22,11 @@ export const useBookSearch = () => {
         if (trimmed.length >= MIN_QUERY_LENGTH &&
             trimmed.toLowerCase() !== lastLoggedQuery.current.toLowerCase() &&
             token) {
+            const requestId = ++lastLogRequestId.current;
             discoveryApi.logSearch(trimmed).then(() => {
-                lastLoggedQuery.current = trimmed;
+                if (requestId === lastLogRequestId.current) {
+                    lastLoggedQuery.current = trimmed;
+                }
             }).catch(() => {
                 // Silently ignore logging errors
             });

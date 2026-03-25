@@ -76,6 +76,9 @@ public class Book {
     }
 
     public void updateProgress(Integer newPage) {
+        if (newPage == null) {
+            throw new IllegalArgumentException("Current page is required");
+        }
         if (newPage < 0) {
             throw new IllegalArgumentException("Current page cannot be negative");
         }

@@ -40,8 +40,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
         long countByUserAndCompletedTrue(User user);
 
-        @Query("SELECT COUNT(b) > 0 FROM Book b WHERE b.user = :user AND b.completed = true AND b.startDate >= :since")
-        boolean existsSpeedReadBook(@Param("user") User user, @Param("since") java.time.LocalDate since);
+
 
         List<Book> findByUserAndReadingGoalTypeIsNotNull(User user);
 }

@@ -5,7 +5,6 @@ import com.example.readflow.shared.exception.InvalidCredentialsException;
 import com.example.readflow.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,8 +23,14 @@ class AuthServiceTest {
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
-    @InjectMocks
+
     private AuthService authService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        lenient().when(passwordEncoder.encode("invalid-user-placeholder")).thenReturn("dummy_encoded");
+        authService = new AuthService(userRepository, passwordEncoder);
+    }
 
     // --- registerUser ---
 

@@ -29,8 +29,8 @@ public class DiscoveryController {
     }
 
     @PostMapping("/search-log")
-    public ResponseEntity<Void> logSearch(@RequestBody java.util.Map<String, String> body, @CurrentUser User user) {
-        discoveryService.logSearch(body.get("query"), user);
+    public ResponseEntity<Void> logSearch(@jakarta.validation.Valid @RequestBody com.example.readflow.discovery.dto.LogSearchRequest request, @CurrentUser User user) {
+        discoveryService.logSearch(request.query(), user);
         return ResponseEntity.noContent().build();
     }
 

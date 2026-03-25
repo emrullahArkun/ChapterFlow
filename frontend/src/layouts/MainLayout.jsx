@@ -39,10 +39,11 @@ const MainLayout = ({ fullWidth = false }) => {
                     <Box
                         position="fixed"
                         top="20px"
-                        left="50%"
-                        transform="translateX(-50%)"
+                        left={0}
+                        right={0}
+                        mx="auto"
                         zIndex="toast"
-                        width="auto"
+                        width="fit-content"
                     >
                         <Flex
                             as="button"
