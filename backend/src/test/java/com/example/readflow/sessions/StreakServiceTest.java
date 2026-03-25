@@ -4,11 +4,13 @@ import com.example.readflow.auth.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
@@ -20,23 +22,27 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class StreakServiceTest {
 
+    private static final LocalDate FIXED_DATE = LocalDate.of(2026, 3, 25);
+    private static final Instant FIXED_INSTANT = FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(12).toInstant();
+    private static final Clock FIXED_CLOCK = Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC);
+
     @Mock
     private ReadingSessionRepository sessionRepository;
 
-    @InjectMocks
     private StreakService streakService;
 
     private User user;
 
     @BeforeEach
     void setUp() {
+        streakService = new StreakService(sessionRepository, FIXED_CLOCK);
         user = new User();
         user.setId(1L);
     }
 
     @Test
     void calculateStreaks_ShouldReturnZeros_WhenNoReadingDays() {
-        when(sessionRepository.findAllDistinctReadingDays(eq(user), eq(SessionStatus.COMPLETED)))
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
                 .thenReturn(Collections.emptyList());
 
         StreakService.StreakInfo result = streakService.calculateStreaks(user);
@@ -46,9 +52,12 @@ class StreakServiceTest {
 
     @Test
     void calculateStreaks_ShouldCountConsecutiveDays_IncludingToday() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        when(sessionRepository.findAllDistinctReadingDays(eq(user), eq(SessionStatus.COMPLETED)))
-                .thenReturn(List.of(today, today.minusDays(1), today.minusDays(2)));
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.minusDays(1).atStartOfDay(ZoneOffset.UTC).plusHours(14).toInstant(),
+                        FIXED_DATE.minusDays(2).atStartOfDay(ZoneOffset.UTC).plusHours(8).toInstant()
+                ));
 
         StreakService.StreakInfo result = streakService.calculateStreaks(user);
         assertEquals(3, result.current());
@@ -57,9 +66,12 @@ class StreakServiceTest {
 
     @Test
     void calculateStreaks_ShouldCountFromYesterday_WhenNoSessionToday() {
-        LocalDate yesterday = LocalDate.now(ZoneOffset.UTC).minusDays(1);
-        when(sessionRepository.findAllDistinctReadingDays(eq(user), eq(SessionStatus.COMPLETED)))
-                .thenReturn(List.of(yesterday, yesterday.minusDays(1)));
+        LocalDate yesterday = FIXED_DATE.minusDays(1);
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(
+                        yesterday.atStartOfDay(ZoneOffset.UTC).plusHours(20).toInstant(),
+                        yesterday.minusDays(1).atStartOfDay(ZoneOffset.UTC).plusHours(15).toInstant()
+                ));
 
         StreakService.StreakInfo result = streakService.calculateStreaks(user);
         assertEquals(2, result.current());
@@ -68,9 +80,12 @@ class StreakServiceTest {
 
     @Test
     void calculateStreaks_ShouldBreakCurrentOnGap() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        when(sessionRepository.findAllDistinctReadingDays(eq(user), eq(SessionStatus.COMPLETED)))
-                .thenReturn(List.of(today, today.minusDays(1), today.minusDays(3)));
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.minusDays(1).atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.minusDays(3).atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant()
+                ));
 
         StreakService.StreakInfo result = streakService.calculateStreaks(user);
         assertEquals(2, result.current());
@@ -79,9 +94,11 @@ class StreakServiceTest {
 
     @Test
     void calculateStreaks_ShouldReturnZeroCurrent_WhenLastReadingWasTwoDaysAgo() {
-        LocalDate twoDaysAgo = LocalDate.now(ZoneOffset.UTC).minusDays(2);
-        when(sessionRepository.findAllDistinctReadingDays(eq(user), eq(SessionStatus.COMPLETED)))
-                .thenReturn(List.of(twoDaysAgo));
+        LocalDate twoDaysAgo = FIXED_DATE.minusDays(2);
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(
+                        twoDaysAgo.atStartOfDay(ZoneOffset.UTC).plusHours(12).toInstant()
+                ));
 
         StreakService.StreakInfo result = streakService.calculateStreaks(user);
         assertEquals(0, result.current());
@@ -90,11 +107,13 @@ class StreakServiceTest {
 
     @Test
     void calculateStreaks_ShouldFindLongestConsecutiveRun() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        when(sessionRepository.findAllDistinctReadingDays(eq(user), eq(SessionStatus.COMPLETED)))
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
                 .thenReturn(List.of(
-                        today, today.minusDays(1),
-                        today.minusDays(5), today.minusDays(6), today.minusDays(7)
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.minusDays(1).atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.minusDays(5).atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.minusDays(6).atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.minusDays(7).atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant()
                 ));
 
         StreakService.StreakInfo result = streakService.calculateStreaks(user);
@@ -104,9 +123,56 @@ class StreakServiceTest {
 
     @Test
     void calculateStreaks_ShouldReturnOneForBoth_WhenSingleDayToday() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        when(sessionRepository.findAllDistinctReadingDays(eq(user), eq(SessionStatus.COMPLETED)))
-                .thenReturn(List.of(today));
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(18).toInstant()
+                ));
+
+        StreakService.StreakInfo result = streakService.calculateStreaks(user);
+        assertEquals(1, result.current());
+        assertEquals(1, result.longest());
+    }
+
+    @Test
+    void calculateStreaks_ShouldRespectUserTimezone() {
+        // Fixed clock at 2026-03-25 12:00 UTC
+        // In Europe/Berlin (UTC+1 in March) that's 13:00 local time
+        ZoneId berlin = ZoneId.of("Europe/Berlin");
+        LocalDate todayBerlin = FIXED_DATE; // same calendar day at noon
+
+        // Two sessions on consecutive Berlin dates
+        Instant lateEvening = todayBerlin.minusDays(1).atStartOfDay(berlin).plusHours(23).plusMinutes(30)
+                .toInstant();
+        Instant earlyMorning = todayBerlin.atStartOfDay(berlin).plusHours(1).plusMinutes(30)
+                .toInstant();
+
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(lateEvening, earlyMorning));
+
+        StreakService.StreakInfo berlinResult = streakService.calculateStreaks(user, berlin);
+        assertEquals(2, berlinResult.current());
+    }
+
+    @Test
+    void calculateStreaks_ShouldDeduplicateMultipleSessionsSameDay() {
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant(),
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(14).toInstant(),
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(20).toInstant()
+                ));
+
+        StreakService.StreakInfo result = streakService.calculateStreaks(user);
+        assertEquals(1, result.current());
+        assertEquals(1, result.longest());
+    }
+
+    @Test
+    void calculateStreaks_ShouldFallbackToUtc_WhenNoTimezoneProvided() {
+        when(sessionRepository.findAllCompletedEndTimes(eq(user), eq(SessionStatus.COMPLETED)))
+                .thenReturn(List.of(
+                        FIXED_DATE.atStartOfDay(ZoneOffset.UTC).plusHours(10).toInstant()
+                ));
 
         StreakService.StreakInfo result = streakService.calculateStreaks(user);
         assertEquals(1, result.current());
