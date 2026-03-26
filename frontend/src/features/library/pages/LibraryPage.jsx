@@ -64,16 +64,37 @@ function LibraryPage() {
 
     return (
         <Box w="100%" px={{ base: 4, md: 8 }} py={6} minH="calc(100vh - 80px)">
+            <Flex
+                align="center"
+                justify="space-between"
+                mb={6}
+                gap={4}
+                minH="40px"
+            >
+                <Box flex="1" />
+                <Flex flex="1" justify="center">
+                    <LibraryPagination
+                        page={page}
+                        totalPages={totalPages}
+                        onPreviousPage={() => setPage((currentPage) => Math.max(0, currentPage - 1))}
+                        onNextPage={() => setPage((currentPage) => Math.min(Math.max(totalPages - 1, 0), currentPage + 1))}
+                    />
+                </Flex>
+                <Flex flex="1" justify="flex-end">
+                    {books.length > 0 && (
+                        <LibraryActionsBar
+                            selectedCount={selectedBooks.size}
+                            onDeleteSelected={onDeleteSelectedOpen}
+                            onDeleteAll={onDeleteAllOpen}
+                        />
+                    )}
+                </Flex>
+            </Flex>
+
             {books.length === 0 ? (
                 <LibraryEmptyState />
             ) : (
                 <>
-                    <LibraryActionsBar
-                        selectedCount={selectedBooks.size}
-                        onDeleteSelected={onDeleteSelectedOpen}
-                        onDeleteAll={onDeleteAllOpen}
-                    />
-
                     <Flex wrap="wrap" gap={6} justify="flex-start" alignContent="flex-start">
                         {books.map(book => (
                             <Box key={book.id} w={{ base: "calc(50% - 12px)", sm: "200px" }} flexShrink={0}>
@@ -86,13 +107,6 @@ function LibraryPage() {
                             </Box>
                         ))}
                     </Flex>
-
-                    <LibraryPagination
-                        page={page}
-                        totalPages={totalPages}
-                        onPreviousPage={() => setPage((currentPage) => Math.max(0, currentPage - 1))}
-                        onNextPage={() => setPage((currentPage) => Math.min(totalPages - 1, currentPage + 1))}
-                    />
 
                     <ConfirmDialog
                         isOpen={isDeleteSelectedOpen}
