@@ -4,7 +4,7 @@ import SearchPage from './SearchPage';
 
 const mockUseBookSearch = vi.fn();
 
-vi.mock('../model/useBookSearch.jsx', () => ({
+vi.mock('../model/useBookSearch', () => ({
     useBookSearch: () => mockUseBookSearch(),
 }));
 
@@ -95,5 +95,27 @@ describe('SearchPage', () => {
             expect(window.__searchAddResult).toBe('resolved');
             expect(onBookAdded).toHaveBeenCalledTimes(1);
         });
+    });
+
+    it('shows and triggers the load more action when more results are available', () => {
+        const loadMore = vi.fn();
+
+        mockUseBookSearch.mockReturnValue({
+            query: 'dup',
+            setQuery: vi.fn(),
+            results: [book],
+            error: null,
+            hasMore: true,
+            isLoading: false,
+            isFetchingNextPage: false,
+            searchBooks: vi.fn(),
+            loadMore,
+            addBookToLibrary: vi.fn(),
+        });
+
+        render(<SearchPage />);
+        fireEvent.click(screen.getByRole('button', { name: 'search.loadMore' }));
+
+        expect(loadMore).toHaveBeenCalledTimes(1);
     });
 });

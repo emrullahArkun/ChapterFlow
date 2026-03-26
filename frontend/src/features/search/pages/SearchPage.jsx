@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import styles from './SearchPage.module.css';
-import { useBookSearch } from '../model/useBookSearch.jsx';
+import { useBookSearch } from '../model/useBookSearch';
 import SearchForm from '../ui/SearchForm';
 import SearchResultCard from '../ui/SearchResultCard';
 import SearchResultSkeleton from '../ui/SearchResultSkeleton';
