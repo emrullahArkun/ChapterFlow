@@ -1,6 +1,6 @@
 package com.example.readflow.shared.security;
 
-import com.example.readflow.auth.User;
+import com.example.readflow.auth.domain.User;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;

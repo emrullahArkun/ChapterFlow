@@ -1,7 +1,7 @@
 package com.example.readflow.shared.security;
 
-import com.example.readflow.auth.Role;
-import com.example.readflow.auth.User;
+import com.example.readflow.auth.domain.Role;
+import com.example.readflow.auth.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
