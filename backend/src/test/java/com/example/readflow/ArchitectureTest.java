@@ -17,10 +17,9 @@ public class ArchitectureTest {
                         .should().dependOnClassesThat().haveSimpleNameEndingWith("Repository");
 
         @ArchTest
-        static final ArchRule services_should_be_annotated_with_Service = classes().that()
-                        .haveSimpleNameEndingWith("Service")
-                        .and().areNotInterfaces()
-                        .should().beAnnotatedWith(org.springframework.stereotype.Service.class);
+        static final ArchRule controllers_should_live_in_api_packages = classes().that()
+                        .haveSimpleNameEndingWith("Controller")
+                        .should().resideInAPackage("..api");
 
         @ArchTest
         static final ArchRule controllers_should_be_annotated_with_RestController = classes().that()
@@ -28,8 +27,45 @@ public class ArchitectureTest {
                         .should().beAnnotatedWith(org.springframework.web.bind.annotation.RestController.class);
 
         @ArchTest
-        static final ArchRule shared_should_not_depend_on_books = noClasses().that()
-                        .resideInAPackage("..shared..")
+        static final ArchRule services_should_be_annotated_with_Service = classes().that()
+                        .haveSimpleNameEndingWith("Service")
+                        .and().areNotInterfaces()
+                        .should().beAnnotatedWith(org.springframework.stereotype.Service.class);
+
+        @ArchTest
+        static final ArchRule repositories_should_live_in_infra_persistence_packages = classes().that()
+                        .haveSimpleNameEndingWith("Repository")
+                        .should().resideInAPackage("..infra.persistence");
+
+        @ArchTest
+        static final ArchRule feature_dtos_should_live_in_api_dto_packages = classes().that()
+                        .areTopLevelClasses()
+                        .and().resideOutsideOfPackage("..shared.dto..")
+                        .and().haveSimpleNameEndingWith("Dto")
+                        .should().resideInAPackage("..api.dto..");
+
+        @ArchTest
+        static final ArchRule feature_requests_should_live_in_api_dto_packages = classes().that()
+                        .areTopLevelClasses()
+                        .and().haveSimpleNameEndingWith("Request")
+                        .should().resideInAPackage("..api.dto..");
+
+        @ArchTest
+        static final ArchRule feature_responses_should_live_in_api_dto_packages = classes().that()
+                        .areTopLevelClasses()
+                        .and().resideOutsideOfPackage("..shared.dto..")
+                        .and().haveSimpleNameEndingWith("Response")
+                        .should().resideInAPackage("..api.dto..");
+
+        @ArchTest
+        static final ArchRule non_security_shared_packages_should_not_depend_on_feature_packages = noClasses().that()
+                        .resideInAnyPackage("..shared.config..", "..shared.dto..", "..shared.exception..", "..shared.time..")
                         .should().dependOnClassesThat()
-                        .resideInAnyPackage("..books..", "..sessions..", "..discovery..");
+                        .resideInAnyPackage("..auth..", "..books..", "..discovery..", "..sessions..", "..stats..");
+
+        @ArchTest
+        static final ArchRule shared_security_should_only_depend_on_auth_feature = noClasses().that()
+                        .resideInAPackage("..shared.security..")
+                        .should().dependOnClassesThat()
+                        .resideInAnyPackage("..books..", "..discovery..", "..sessions..", "..stats..");
 }

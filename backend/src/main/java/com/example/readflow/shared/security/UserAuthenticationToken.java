@@ -1,6 +1,6 @@
 package com.example.readflow.shared.security;
 
-import com.example.readflow.auth.User;
+import com.example.readflow.auth.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;

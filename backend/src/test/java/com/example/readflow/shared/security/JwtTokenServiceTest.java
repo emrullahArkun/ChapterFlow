@@ -1,7 +1,7 @@
 package com.example.readflow.shared.security;
 
-import com.example.readflow.auth.Role;
-import com.example.readflow.auth.User;
+import com.example.readflow.auth.domain.Role;
+import com.example.readflow.auth.domain.User;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,8 +1,8 @@
 package com.example.readflow.shared.security;
 
-import com.example.readflow.auth.Role;
-import com.example.readflow.auth.User;
-import com.example.readflow.auth.UserRepository;
+import com.example.readflow.auth.domain.Role;
+import com.example.readflow.auth.domain.User;
+import com.example.readflow.auth.infra.persistence.UserRepository;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -11,8 +11,8 @@ import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import com.example.readflow.books.BookRepository;
-import com.example.readflow.sessions.ReadingSessionRepository;
+import com.example.readflow.books.infra.persistence.BookRepository;
+import com.example.readflow.sessions.infra.persistence.ReadingSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
