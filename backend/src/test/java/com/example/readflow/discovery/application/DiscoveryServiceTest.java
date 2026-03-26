@@ -1,7 +1,7 @@
 package com.example.readflow.discovery.application;
 
 import com.example.readflow.auth.domain.User;
-import com.example.readflow.discovery.api.dto.RecommendedBookDto;
+import com.example.readflow.discovery.domain.DiscoveryBook;
 import com.example.readflow.discovery.domain.DiscoverySnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,9 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,15 +31,20 @@ class DiscoveryServiceTest {
     @Mock
     private DiscoveryRecommendationService recommendationService;
 
+    private DiscoverySectionsService discoverySectionsService;
     private DiscoveryService discoveryService;
     private User user;
 
     @BeforeEach
     void setUp() {
-        discoveryService = new DiscoveryService(
+        discoverySectionsService = new DiscoverySectionsService(
                 userDataService,
                 recommendationService,
                 Executors.newVirtualThreadPerTaskExecutor());
+        discoveryService = new DiscoveryService(
+                userDataService,
+                recommendationService,
+                discoverySectionsService);
         user = new User();
         user.setId(1L);
     }
@@ -63,7 +71,7 @@ class DiscoveryServiceTest {
 
     @Test
     void getRecommendationsByAuthor_ShouldDelegate() {
-        RecommendedBookDto book = new RecommendedBookDto("Book Title", List.of("Author"), null, null, 200, "isbn456", null);
+        DiscoveryBook book = new DiscoveryBook("Book Title", List.of("Author"), null, null, 200, "isbn456", null);
         when(recommendationService.getRecommendationsByAuthor("Author", Set.of("owned123"), 5))
                 .thenReturn(List.of(book));
 
@@ -75,7 +83,7 @@ class DiscoveryServiceTest {
 
     @Test
     void getRecommendationsByCategory_ShouldDelegate() {
-        RecommendedBookDto book = new RecommendedBookDto("Cat Book", null, null, null, null, null, null);
+        DiscoveryBook book = new DiscoveryBook("Cat Book", null, null, null, null, null, null);
         when(recommendationService.getRecommendationsByCategory("Fiction", Set.of(), 5))
                 .thenReturn(List.of(book));
 
@@ -86,7 +94,7 @@ class DiscoveryServiceTest {
 
     @Test
     void getRecommendationsByQuery_ShouldDelegate() {
-        RecommendedBookDto book = new RecommendedBookDto("Search Book", null, null, null, null, null, null);
+        DiscoveryBook book = new DiscoveryBook("Search Book", null, null, null, null, null, null);
         when(recommendationService.getRecommendationsByQuery("Java", Set.of(), 5))
                 .thenReturn(List.of(book));
 
@@ -109,7 +117,7 @@ class DiscoveryServiceTest {
     void getAuthorSection_ShouldReturnEmpty_WhenNoAuthors() {
         when(userDataService.getTopAuthors(eq(user), anyInt())).thenReturn(List.of());
 
-        var result = discoveryService.getAuthorSection(user, Set.of());
+        var result = discoveryService.getAuthorSection(user);
 
         assertTrue(result.authors().isEmpty());
         assertTrue(result.books().isEmpty());
@@ -117,11 +125,13 @@ class DiscoveryServiceTest {
 
     @Test
     void getAuthorSection_ShouldReturnBooks_WhenAuthorsExist() {
-        RecommendedBookDto book = new RecommendedBookDto("Book1", null, null, null, null, null, null);
+        DiscoveryBook book = new DiscoveryBook("Book1", null, null, null, null, null, null);
         when(userDataService.getTopAuthors(eq(user), anyInt())).thenReturn(List.of("Author1"));
         when(recommendationService.getRecommendationsByAuthor("Author1", Set.of(), 10)).thenReturn(List.of(book));
 
-        var result = discoveryService.getAuthorSection(user, Set.of());
+        when(userDataService.getOwnedIsbns(user)).thenReturn(Set.of());
+
+        var result = discoveryService.getAuthorSection(user);
 
         assertEquals(List.of("Author1"), result.authors());
         assertEquals(1, result.books().size());
@@ -131,7 +141,7 @@ class DiscoveryServiceTest {
     void getCategorySection_ShouldReturnEmpty_WhenNoCategories() {
         when(userDataService.getTopCategories(eq(user), anyInt())).thenReturn(List.of());
 
-        var result = discoveryService.getCategorySection(user, Set.of());
+        var result = discoveryService.getCategorySection(user);
 
         assertTrue(result.categories().isEmpty());
         assertTrue(result.books().isEmpty());
@@ -139,11 +149,13 @@ class DiscoveryServiceTest {
 
     @Test
     void getCategorySection_ShouldReturnBooks_WhenCategoriesExist() {
-        RecommendedBookDto book = new RecommendedBookDto("Book1", null, null, null, null, null, null);
+        DiscoveryBook book = new DiscoveryBook("Book1", null, null, null, null, null, null);
         when(userDataService.getTopCategories(eq(user), anyInt())).thenReturn(List.of("Cat1"));
         when(recommendationService.getRecommendationsByCategory("Cat1", Set.of(), 10)).thenReturn(List.of(book));
 
-        var result = discoveryService.getCategorySection(user, Set.of());
+        when(userDataService.getOwnedIsbns(user)).thenReturn(Set.of());
+
+        var result = discoveryService.getCategorySection(user);
 
         assertEquals(List.of("Cat1"), result.categories());
         assertEquals(1, result.books().size());
@@ -153,7 +165,7 @@ class DiscoveryServiceTest {
     void getSearchSection_ShouldReturnEmpty_WhenNoSearches() {
         when(userDataService.getRecentSearches(eq(user), anyInt())).thenReturn(List.of());
 
-        var result = discoveryService.getSearchSection(user, Set.of());
+        var result = discoveryService.getSearchSection(user);
 
         assertTrue(result.queries().isEmpty());
         assertTrue(result.books().isEmpty());
@@ -161,11 +173,13 @@ class DiscoveryServiceTest {
 
     @Test
     void getSearchSection_ShouldReturnBooks_WhenSearchesExist() {
-        RecommendedBookDto book = new RecommendedBookDto("Book1", null, null, null, null, null, null);
+        DiscoveryBook book = new DiscoveryBook("Book1", null, null, null, null, null, null);
         when(userDataService.getRecentSearches(eq(user), anyInt())).thenReturn(List.of("query1"));
         when(recommendationService.getRecommendationsByQuery("query1", Set.of(), 10)).thenReturn(List.of(book));
 
-        var result = discoveryService.getSearchSection(user, Set.of());
+        when(userDataService.getOwnedIsbns(user)).thenReturn(Set.of());
+
+        var result = discoveryService.getSearchSection(user);
 
         assertEquals(List.of("query1"), result.queries());
         assertEquals(1, result.books().size());
@@ -188,7 +202,7 @@ class DiscoveryServiceTest {
 
     @Test
     void getDiscoveryData_ShouldReturnAllSections() {
-        RecommendedBookDto book = new RecommendedBookDto("Book1", null, null, null, null, null, null);
+        DiscoveryBook book = new DiscoveryBook("Book1", null, null, null, null, null, null);
         when(userDataService.getSnapshot(user, 3, 5))
                 .thenReturn(new DiscoverySnapshot(Set.of(), List.of("Author1"), List.of("Cat1"), List.of("query1")));
         when(recommendationService.getRecommendationsByAuthor("Author1", Set.of(), 10)).thenReturn(List.of(book));
@@ -203,5 +217,37 @@ class DiscoveryServiceTest {
         assertEquals(1, result.byCategory().books().size());
         assertEquals(List.of("query1"), result.bySearch().queries());
         assertEquals(1, result.bySearch().books().size());
+    }
+
+    @Test
+    void getDiscoveryData_ShouldReturnEmptyBooks_WhenRecommendationTimesOut() {
+        when(userDataService.getSnapshot(user, 3, 5))
+                .thenReturn(new DiscoverySnapshot(Set.of(), List.of("Author1"), List.of(), List.of()));
+        when(recommendationService.getRecommendationsByAuthor("Author1", Set.of(), 10))
+                .thenAnswer(invocation -> {
+                    Thread.sleep(100);
+                    return List.of(new DiscoveryBook("Slow Book", null, null, null, null, null, null));
+                });
+
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            DiscoverySectionsService timeoutSectionsService = new DiscoverySectionsService(
+                    userDataService,
+                    recommendationService,
+                    executor,
+                    10L);
+            DiscoveryService timeoutDiscoveryService = new DiscoveryService(
+                    userDataService,
+                    recommendationService,
+                    timeoutSectionsService);
+
+            var result = assertTimeoutPreemptively(
+                    Duration.ofMillis(250),
+                    () -> timeoutDiscoveryService.getDiscoveryData(user));
+
+            assertEquals(List.of("Author1"), result.byAuthor().authors());
+            assertTrue(result.byAuthor().books().isEmpty());
+            assertTrue(result.byCategory().books().isEmpty());
+            assertTrue(result.bySearch().books().isEmpty());
+        }
     }
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../auth/model/AuthContext';
+import { useAuth } from '../../auth/model';
 import { useReadingSessionContext } from './ReadingSessionContext';
 import { useToast } from '@chakra-ui/react';
 import { useReadingSessionBook } from './useReadingSessionBook';
@@ -17,6 +17,8 @@ export const useReadingSessionPageLogic = (bookId) => {
     // Global Session logic
     const {
         activeSession,
+        sessionPhase,
+        isBusy,
         startSession,
         stopSession,
         formattedTime,
@@ -34,9 +36,9 @@ export const useReadingSessionPageLogic = (bookId) => {
 
     useReadingSessionLifecycle({
         activeSession,
+        sessionPhase,
         book,
         bookId,
-        sessionLoading,
         hasStopped,
         startSession,
         navigate,
@@ -54,6 +56,7 @@ export const useReadingSessionPageLogic = (bookId) => {
     } = useReadingSessionStopFlow({
         book,
         isPaused,
+        isBusy,
         pauseSession,
         resumeSession,
         stopSession,
@@ -68,6 +71,8 @@ export const useReadingSessionPageLogic = (bookId) => {
         fetchingBook,
         activeSession,
         sessionLoading,
+        sessionPhase,
+        isBusy,
         formattedTime,
         isPaused,
         resumeSession,

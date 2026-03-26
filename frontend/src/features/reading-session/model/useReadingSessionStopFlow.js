@@ -1,9 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { ROUTES } from '../../../app/router/routes';
+import {
+    createInitialStopFlowState,
+    READING_SESSION_STOP_EVENTS,
+    readingSessionStopReducer,
+} from './readingSessionStopMachine';
 
 export const useReadingSessionStopFlow = ({
     book,
     isPaused,
+    isBusy,
     pauseSession,
     resumeSession,
     stopSession,
@@ -12,32 +18,40 @@ export const useReadingSessionStopFlow = ({
     t,
     setHasStopped,
 }) => {
-    const [showStopConfirm, setShowStopConfirm] = useState(false);
-    const [endPage, setEndPage] = useState('');
-    const [resumeOnCancel, setResumeOnCancel] = useState(false);
+    const [state, dispatch] = useReducer(readingSessionStopReducer, undefined, createInitialStopFlowState);
+    const { isOpen: showStopConfirm, endPage, resumeOnCancel } = state;
+    const currentPage = book?.currentPage;
 
     useEffect(() => {
-        if (book) {
-            setEndPage(String(book.currentPage ?? ''));
+        if (currentPage !== undefined) {
+            dispatch({
+                type: READING_SESSION_STOP_EVENTS.BOOK_SYNCED,
+                currentPage,
+            });
         }
-    }, [book]);
+    }, [currentPage]);
 
     const handleStopClick = () => {
+        if (isBusy) {
+            return;
+        }
+
         if (!isPaused) {
             pauseSession();
-            setResumeOnCancel(true);
-        } else {
-            setResumeOnCancel(false);
         }
-        setShowStopConfirm(true);
+
+        dispatch({
+            type: READING_SESSION_STOP_EVENTS.STOP_REQUESTED,
+            wasPaused: isPaused,
+        });
     };
 
     const handleStopCancel = () => {
-        setShowStopConfirm(false);
         if (resumeOnCancel) {
             resumeSession();
         }
-        setResumeOnCancel(false);
+
+        dispatch({ type: READING_SESSION_STOP_EVENTS.STOP_CANCELLED });
     };
 
     const handleConfirmStop = async () => {
@@ -61,6 +75,7 @@ export const useReadingSessionStopFlow = ({
 
         setHasStopped(true);
         const success = await stopSession(new Date(), pageNum);
+
         if (success) {
             toast({
                 title: t('readingSession.alerts.summary', { pages: pagesRead > 0 ? pagesRead : 0 }),
@@ -73,11 +88,10 @@ export const useReadingSessionStopFlow = ({
         }
 
         setHasStopped(false);
-        setShowStopConfirm(false);
         if (resumeOnCancel) {
             resumeSession();
         }
-        setResumeOnCancel(false);
+        dispatch({ type: READING_SESSION_STOP_EVENTS.STOP_FAILED });
         toast({
             title: t('readingSession.alerts.stopError'),
             status: 'error',
@@ -89,7 +103,7 @@ export const useReadingSessionStopFlow = ({
     return {
         showStopConfirm,
         endPage,
-        setEndPage,
+        setEndPage: (value) => dispatch({ type: READING_SESSION_STOP_EVENTS.END_PAGE_CHANGED, value }),
         handleStopClick,
         handleStopCancel,
         handleConfirmStop,

@@ -1,9 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../auth/model/AuthContext';
-import { booksApi } from '../api/booksApi';
-import { getOpenLibraryCoverUrl } from '../../../shared/lib/coverUtils';
+import { useAuth } from '../../auth/model';
+import { booksApi, buildLibraryBookPayload } from '../../library/api';
 
 const TOAST_STYLE = {
     containerStyle: { marginTop: '80px' },
@@ -25,7 +24,7 @@ const ToastMessage = ({ bgColor, children }) => (
     </div>
 );
 
-export const useAddBookToLibrary = () => {
+export const useAddSearchResultToLibrary = () => {
     const { token, user } = useAuth();
     const toast = useToast();
     const { t } = useTranslation();
@@ -33,26 +32,11 @@ export const useAddBookToLibrary = () => {
 
     return useMutation({
         mutationFn: async (book) => {
-            if (!token) throw new Error(t('search.toast.loginRequired'));
+            if (!token) {
+                throw new Error(t('search.toast.loginRequired'));
+            }
 
-            const isbn = book.isbn || null;
-            const coverUrl = book.coverUrl || (isbn ? getOpenLibraryCoverUrl(isbn) : '');
-
-            const categories = Array.isArray(book.categories)
-                ? book.categories
-                : (book.categories ? [book.categories] : []);
-
-            const newBook = {
-                title: book.title,
-                isbn: isbn,
-                authorName: Array.isArray(book.authors) ? book.authors[0] : (book.authors || 'Unknown Author'),
-                publishYear: book.publishYear || null,
-                coverUrl: coverUrl,
-                pageCount: book.pageCount || 0,
-                categories: categories,
-            };
-
-            return { result: await booksApi.create(newBook) };
+            return booksApi.create(buildLibraryBookPayload(book));
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['myBooks'] });

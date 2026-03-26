@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MyBookCard from './MyBookCard';
 import { MemoryRouter } from 'react-router-dom';
@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async () => {
 
 // Mock UI Components
 vi.mock('../../../shared/ui/BookCover', () => ({
-    default: ({ book }) => <div data-testid="book-cover">{book?.title}</div>
+    default: ({ book }) => <div data-testid="book-cover">{book?.volumeInfo?.title ?? book?.title}</div>
 }));
 
 describe('MyBookCard', () => {
@@ -55,8 +55,7 @@ describe('MyBookCard', () => {
         renderCard();
         expect(screen.getByTestId('book-cover')).toBeInTheDocument();
         expect(screen.getAllByText('Test Book').length).toBeGreaterThanOrEqual(1);
-        // Pages text (e.g. "10 / 100 bookStats.pages")
-        expect(screen.getByText(/bookStats\.pages/)).toBeInTheDocument();
+        expect(screen.getByText('bookStats.pageProgress')).toBeInTheDocument();
     });
 
     it('renders completed badge if completed', () => {
@@ -67,7 +66,22 @@ describe('MyBookCard', () => {
     it('renders no page count if pageCount is 0', () => {
         renderCard({ ...defaultBook, pageCount: 0 });
         // When pageCount is 0, no page info is rendered
-        expect(screen.queryByText('bookStats.pages')).toBeNull();
+        expect(screen.queryByText('bookStats.pageProgress')).toBeNull();
+    });
+
+    it('uses the volumeInfo title when provided', () => {
+        renderCard({
+            ...defaultBook,
+            title: 'Outer Title',
+            volumeInfo: {
+                title: 'Inner Title',
+            },
+        });
+
+        const card = screen.getByRole('group');
+        expect(within(card).getByTestId('book-cover')).toHaveTextContent('Inner Title');
+        expect(within(card).getByText('Inner Title', { selector: 'p' })).toBeInTheDocument();
+        expect(within(card).queryByText('Outer Title', { selector: 'p' })).toBeNull();
     });
 
     it('triggers onToggleSelect when checkbox is clicked', () => {
