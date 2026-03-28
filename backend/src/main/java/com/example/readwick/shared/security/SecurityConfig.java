@@ -1,4 +1,4 @@
-package com.example.chapterflow.shared.security;
+package com.example.readwick.shared.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +41,9 @@ public class SecurityConfig {
 
     @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}")
     private String[] allowedOrigins;
+
+    @Value("${app.jwt.cookie-secure:true}")
+    private boolean secureCookie;
 
     private final CookieBearerTokenResolver cookieBearerTokenResolver;
     private final JwtUserAuthenticationConverter jwtUserAuthenticationConverter;
@@ -112,6 +115,8 @@ public class SecurityConfig {
     private CookieCsrfTokenRepository csrfTokenRepository() {
         CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         repository.setCookiePath("/");
+        repository.setSecure(secureCookie);
+        repository.setCookieCustomizer(cookie -> cookie.sameSite("Lax"));
         return repository;
     }
 

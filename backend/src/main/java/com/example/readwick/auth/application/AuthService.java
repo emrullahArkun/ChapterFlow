@@ -1,15 +1,17 @@
-package com.example.chapterflow.auth.application;
+package com.example.readwick.auth.application;
 
-import com.example.chapterflow.auth.domain.Role;
-import com.example.chapterflow.auth.domain.User;
-import com.example.chapterflow.auth.infra.persistence.UserRepository;
-import com.example.chapterflow.shared.exception.DuplicateResourceException;
-import com.example.chapterflow.shared.exception.InvalidCredentialsException;
-import com.example.chapterflow.shared.exception.ResourceNotFoundException;
+import com.example.readwick.auth.domain.Role;
+import com.example.readwick.auth.domain.User;
+import com.example.readwick.auth.infra.persistence.UserRepository;
+import com.example.readwick.shared.exception.DuplicateResourceException;
+import com.example.readwick.shared.exception.InvalidCredentialsException;
+import com.example.readwick.shared.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Locale;
 
 @Service
 @Slf4j
@@ -26,14 +28,19 @@ public class AuthService {
         this.dummyHash = passwordEncoder.encode("invalid-user-placeholder");
     }
 
+    private static String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
     @Transactional
     public User registerUser(String email, String password) {
-        if (userRepository.existsByEmail(email)) {
+        String normalized = normalizeEmail(email);
+        if (userRepository.existsByEmail(normalized)) {
             throw new DuplicateResourceException("Email already taken");
         }
 
         User user = new User();
-        user.setEmail(email);
+        user.setEmail(normalized);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(Role.USER);
         user.setEnabled(true);
@@ -42,7 +49,8 @@ public class AuthService {
     }
 
     public User login(String email, String password) {
-        User user = userRepository.findByEmail(email).orElse(null);
+        String normalized = normalizeEmail(email);
+        User user = userRepository.findByEmail(normalized).orElse(null);
 
         // Always run BCrypt to prevent timing-based user enumeration
         String hashToCheck = user != null ? user.getPassword() : dummyHash;
@@ -70,7 +78,7 @@ public class AuthService {
     }
 
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmail(normalizeEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }
