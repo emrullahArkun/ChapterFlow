@@ -1,6 +1,6 @@
 {
     "navbar": {
-        "brand": "ChapterFlow",
+        "brand": "ReadWick",
         "focus": "Startseite",
         "goals": "Meine Ziele",
         "discovery": "Entdecken",
@@ -30,7 +30,7 @@
         "achievementProgress": "{{current}}/{{target}} {{unit}}",
         "focusBadge": "Lesemoment",
         "focusTitle": "Starte mit dem Buch, das jetzt wirklich zählt.",
-        "focusSubtitle": "ChapterFlow hilft dir, echte Lesesessions zu beginnen, dranzubleiben und Bücher wirklich zu Ende zu lesen.",
+        "focusSubtitle": "ReadWick hilft dir, echte Lesesessions zu beginnen, dranzubleiben und Bücher wirklich zu Ende zu lesen.",
         "ledgerTitle": "Lesebilanz",
         "journalLabel": "Lesejournal",
         "focusBookLabel": "Buch für jetzt",
@@ -236,13 +236,13 @@
         "enterPassword": "Passwort eingeben",
         "errorTitle": "Fehler",
         "brand": {
-            "appName": "ChapterFlow",
+            "appName": "ReadWick",
             "tagline": "Dein persönlicher gemütlicher Leseplatz.",
             "kicker": "Reading journal",
             "journalTitle": "Für ruhige Lesetage",
-            "journalCopy": "ChapterFlow soll sich eher wie ein vertrautes Lesetagebuch anfühlen als wie ein nüchternes Tool. Warm, klar und ohne unnötigen Produktivitätsdruck.",
+            "journalCopy": "ReadWick soll sich eher wie ein vertrautes Lesetagebuch anfühlen als wie ein nüchternes Tool. Warm, klar und ohne unnötigen Produktivitätsdruck.",
             "quote": "Ein gutes Leseritual beginnt nicht mit Tempo, sondern mit dem Gefühl, wieder am richtigen Platz zu sein.",
-            "quoteSource": "ChapterFlow Notiz",
+            "quoteSource": "ReadWick Notiz",
             "features": {
                 "track": "Verwalte deine Bibliothek",
                 "trackDesc": "Füge Bücher hinzu, entferne sie und organisiere deine persönliche Sammlung.",

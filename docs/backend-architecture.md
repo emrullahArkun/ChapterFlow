@@ -16,7 +16,7 @@ Das ist absichtlich so. Fachlich zusammengehöriger Code bleibt zusammen. Es gib
 ## Struktur
 
 ```text
-com.example.chapterflow
+com.example.readwick
 ├── auth
 ├── books
 ├── discovery

@@ -2,7 +2,7 @@
 set -eu
 
 ACCESS_MODE="${FRONTEND_ACCESS_MODE:-live}"
-AUTH_REALM="${FRONTEND_BASIC_AUTH_REALM:-ChapterFlow Beta}"
+AUTH_REALM="${FRONTEND_BASIC_AUTH_REALM:-ReadWick Beta}"
 SNIPPETS_DIR="/etc/nginx/snippets"
 HTPASSWD_FILE="/etc/nginx/ops/.htpasswd"
 

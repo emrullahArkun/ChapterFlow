@@ -1,6 +1,6 @@
-# ChapterFlow Frontend
+# ReadWick Frontend
 
-React SPA for the ChapterFlow reading tracker, built with Vite.
+React SPA for the ReadWick reading tracker, built with Vite.
 
 ## Tech Stack
 
