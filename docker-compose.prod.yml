@@ -1,12 +1,12 @@
 services:
   app:
-    build: ./backend # TODO: Replace with pre-built image from CI/CD pipeline (e.g. image: ghcr.io/emrullaharkun/chapterflow-backend:latest)
+    build: ./backend # TODO: Replace with pre-built image from CI/CD pipeline (e.g. image: ghcr.io/emrullaharkun/readwick-backend:latest)
     depends_on:
       db:
         condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/chapterflow
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/readwick
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - APP_JWT_SECRET=${APP_JWT_SECRET}
@@ -16,7 +16,7 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=chapterflow
+      - POSTGRES_DB=readwick
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
@@ -34,11 +34,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+      - "443:443"
     environment:
       - FRONTEND_ACCESS_MODE=${FRONTEND_ACCESS_MODE:-beta}
-      - FRONTEND_BASIC_AUTH_REALM=${FRONTEND_BASIC_AUTH_REALM:-ChapterFlow Beta}
+      - FRONTEND_BASIC_AUTH_REALM=${FRONTEND_BASIC_AUTH_REALM:-ReadWick Beta}
     volumes:
       - ./ops/nginx:/etc/nginx/ops:ro
+      - ${SSL_CERT_DIR:-./ops/ssl}:/etc/nginx/ssl:ro
     depends_on:
       - app
     restart: always

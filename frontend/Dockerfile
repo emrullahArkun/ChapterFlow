@@ -18,8 +18,8 @@ COPY nginx.ssl.conf /etc/nginx/nginx.ssl.conf
 COPY docker-entrypoint.d/30-configure-access-mode.sh /docker-entrypoint.d/30-configure-access-mode.sh
 
 RUN chmod +x /docker-entrypoint.d/30-configure-access-mode.sh \
-    && mkdir -p /etc/nginx/snippets /etc/nginx/ops
+    && mkdir -p /etc/nginx/snippets /etc/nginx/ops /etc/nginx/ssl
 
-EXPOSE 80
+EXPOSE 80 443
 
 CMD ["nginx", "-g", "daemon off;"]
