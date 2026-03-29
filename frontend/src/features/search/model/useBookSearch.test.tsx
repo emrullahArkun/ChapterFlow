@@ -65,6 +65,16 @@ describe('useBookSearch', () => {
         expect(discoveryApi.getByRecentSearches).toHaveBeenCalledTimes(1);
     });
 
+    it('falls back to an empty recent-search list when the API returns null', async () => {
+        discoveryApi.getByRecentSearches.mockResolvedValue(null);
+
+        const { result } = renderHook(() => useBookSearch(), { wrapper });
+
+        await waitFor(() => {
+            expect(result.current.recentSearches).toEqual([]);
+        });
+    });
+
     it('opens history only when recent searches exist and closes it on submit', async () => {
         const { result } = renderHook(() => useBookSearch(), { wrapper });
 
@@ -128,5 +138,132 @@ describe('useBookSearch', () => {
 
         expect(discoveryApi.getByRecentSearches).not.toHaveBeenCalled();
         expect(result.current.isHistoryOpen).toBe(false);
+    });
+
+    it('loads the next page when more results are available', async () => {
+        discoveryApi.search
+            .mockResolvedValueOnce({
+                items: Array.from({ length: 36 }, (_, index) => ({ title: `Book ${index}` })),
+                totalItems: 72,
+            })
+            .mockResolvedValueOnce({
+                items: [{ title: 'Book 36' }],
+                totalItems: 72,
+            });
+
+        const { result } = renderHook(() => useBookSearch(), { wrapper });
+
+        act(() => {
+            result.current.searchBooks('Dune');
+        });
+
+        await waitFor(() => {
+            expect(result.current.hasMore).toBe(true);
+        });
+
+        await act(async () => {
+            await result.current.loadMore();
+        });
+
+        await waitFor(() => {
+            expect(discoveryApi.search).toHaveBeenNthCalledWith(2, 'Dune', 36, 36);
+        });
+    });
+
+    it('does not log the same search twice in a row for the same user', async () => {
+        const { result } = renderHook(() => useBookSearch(), { wrapper });
+
+        act(() => {
+            result.current.searchBooks('Dune');
+        });
+
+        await waitFor(() => {
+            expect(discoveryApi.logSearch).toHaveBeenCalledTimes(1);
+        });
+
+        act(() => {
+            result.current.searchBooks('Dune');
+        });
+
+        await waitFor(() => {
+            expect(discoveryApi.logSearch).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('closes history explicitly and clears active search term when the query becomes blank', async () => {
+        const { result } = renderHook(() => useBookSearch(), { wrapper });
+
+        await waitFor(() => {
+            expect(result.current.recentSearches).toHaveLength(2);
+        });
+
+        act(() => {
+            result.current.openHistory();
+        });
+        expect(result.current.isHistoryOpen).toBe(true);
+
+        act(() => {
+            result.current.closeHistory();
+            result.current.searchBooks('Dune');
+        });
+
+        await waitFor(() => {
+            expect(discoveryApi.search).toHaveBeenCalledWith('Dune', 0, 36);
+        });
+
+        act(() => {
+            result.current.setQuery('   ');
+        });
+
+        await waitFor(() => {
+            expect(result.current.results).toEqual([]);
+            expect(result.current.hasMore).toBe(false);
+        });
+
+        expect(result.current.isHistoryOpen).toBe(false);
+    });
+
+    it('does not call the provider search when the submitted query is blank', async () => {
+        const { result } = renderHook(() => useBookSearch(), { wrapper });
+
+        act(() => {
+            result.current.searchBooks('   ');
+        });
+
+        await waitFor(() => {
+            expect(result.current.results).toEqual([]);
+        });
+
+        expect(discoveryApi.search).not.toHaveBeenCalled();
+        expect(result.current.hasMore).toBe(false);
+    });
+
+    it('falls back to an empty result when the search API returns null', async () => {
+        discoveryApi.search.mockResolvedValueOnce(null);
+
+        const { result } = renderHook(() => useBookSearch(), { wrapper });
+
+        act(() => {
+            result.current.searchBooks('Dune');
+        });
+
+        await waitFor(() => {
+            expect(result.current.results).toEqual([]);
+            expect(result.current.hasMore).toBe(false);
+        });
+    });
+
+    it('surfaces provider errors through the error field', async () => {
+        discoveryApi.search.mockRejectedValueOnce(new Error('Search failed'));
+
+        const { result } = renderHook(() => useBookSearch(), { wrapper });
+
+        act(() => {
+            result.current.searchBooks('Dune');
+        });
+
+        await waitFor(() => {
+            expect(result.current.error).toBe('Search failed');
+        });
     });
 });

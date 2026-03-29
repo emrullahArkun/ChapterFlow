@@ -94,4 +94,20 @@ describe('SearchForm', () => {
 
         expect(onCloseHistory).toHaveBeenCalledTimes(1);
     });
+
+    it('should keep history open when clicking inside the search shell', () => {
+        const onCloseHistory = vi.fn();
+        render(
+            <SearchForm
+                {...baseProps}
+                recentSearches={['Dune']}
+                isHistoryOpen
+                onCloseHistory={onCloseHistory}
+            />,
+        );
+
+        fireEvent.mouseDown(screen.getByRole('button', { name: /Dune/i }));
+
+        expect(onCloseHistory).not.toHaveBeenCalled();
+    });
 });
