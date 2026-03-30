@@ -42,6 +42,7 @@ export const useAddDiscoveryBook = () => {
                 };
             });
             queryClient.invalidateQueries({ queryKey: ['myBooks'] });
+            queryClient.invalidateQueries({ queryKey: ['home'] });
             queryClient.invalidateQueries({ queryKey: ['ownedIsbns', user?.email] });
             const toastOptions = createAppToast({
                 id: 'add-book-toast',

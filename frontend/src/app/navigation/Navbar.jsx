@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useMatch } from 'react-router-dom';
-import { FaBook, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
+import { FaBook, FaSignOutAlt, FaSignInAlt, FaBars, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../features/auth/model';
 import { useAnimation } from '../providers/AnimationProvider';
@@ -13,12 +14,17 @@ function Navbar({ sessionMode = false }) {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation();
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     const { registerTarget } = useAnimation();
     const { activeSession } = useReadingSessionContext();
 
     const isStatsPage = useMatch('/books/:id/stats');
     const isSessionPage = useMatch('/books/:id/session');
+
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [location.pathname]);
 
     const handleLogout = () => {
         logout();
@@ -64,13 +70,18 @@ function Navbar({ sessionMode = false }) {
                 <div className="navbar-menu">
                     {user ? (
                         <>
+                            {!sessionMode && (
+                                <button
+                                    className="navbar-hamburger"
+                                    onClick={() => setMobileOpen((v) => !v)}
+                                    aria-label="Menu"
+                                >
+                                    {mobileOpen ? <FaTimes /> : <FaBars />}
+                                </button>
+                            )}
+
                             <div className="navbar-nav">
-                                {sessionMode ? (
-                                    <div className="navbar-session-note">
-                                        <span className="navbar-session-kicker">Reading</span>
-                                        <span className="navbar-text">{t('readingSession.focusMode')}</span>
-                                    </div>
-                                ) : (
+                                {!sessionMode && (
                                     [...navItems, ...extraItems].map(item => (
                                         <Link
                                             key={`${item.to}-${item.label}`}
@@ -102,6 +113,27 @@ function Navbar({ sessionMode = false }) {
                     {!sessionMode && <LanguageSwitcher variant="navbar" />}
                 </div>
             </div>
+
+            {mobileOpen && !sessionMode && user && (
+                <div className="navbar-mobile-menu">
+                    {[...navItems, ...extraItems].map(item => (
+                        <Link
+                            key={`${item.to}-${item.label}`}
+                            to={item.to}
+                            className={`navbar-mobile-item${isActive(item.to) ? ' active' : ''}`}
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
+                    <div className="navbar-mobile-separator" />
+                    <div className="navbar-mobile-bottom">
+                        <LanguageSwitcher variant="navbar" />
+                        <button onClick={handleLogout} className="navbar-action logout-btn" aria-label={t('navbar.logout')}>
+                            <FaSignOutAlt /> {t('navbar.logout')}
+                        </button>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }

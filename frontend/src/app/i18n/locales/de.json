@@ -239,18 +239,18 @@
         "errorTitle": "Fehler",
         "brand": {
             "appName": "MyBookTracker",
-            "tagline": "Dein persönlicher gemütlicher Leseplatz.",
+            "tagline": "Dein gemütlicher Leseplatz.",
             "kicker": "Reading journal",
             "journalTitle": "Für ruhige Lesetage",
             "journalCopy": "MyBookTracker soll sich eher wie ein vertrautes Lesetagebuch anfühlen als wie ein nüchternes Tool. Warm, klar und ohne unnötigen Produktivitätsdruck.",
             "quote": "Ein gutes Leseritual beginnt nicht mit Tempo, sondern mit dem Gefühl, wieder am richtigen Platz zu sein.",
             "quoteSource": "MyBookTracker Notiz",
             "features": {
-                "track": "Verwalte deine Bibliothek",
+                "track": "Bibliothek verwalten",
                 "trackDesc": "Füge Bücher hinzu, entferne sie und organisiere deine persönliche Sammlung.",
-                "time": "Stoppe deine Lesezeit",
+                "time": "Lesezeit erfassen",
                 "timeDesc": "Erfasse deine tägliche Lesezeit mit einem integrierten Lesetimer.",
-                "visualize": "Visualisiere deinen Fortschritt",
+                "visualize": "Fortschritt sehen",
                 "visualizeDesc": "Erkenne deine Lesegewohnheiten und Fortschritte durch schöne Analysen."
             }
         }
@@ -277,7 +277,9 @@
         "completion": {
             "badge": "Session beendet",
             "title": "Du bist wirklich weitergekommen.",
+            "titleZero": "Was hast du die ganze Zeit gemacht?",
             "subtitle": "Diese Session hat dich {{pages}} Seiten weitergebracht.",
+            "subtitleZero": "Nächstes Mal vielleicht auch das Buch aufschlagen.",
             "startLabel": "Angefangen bei",
             "endLabel": "Erreicht"
         },

@@ -21,6 +21,7 @@ export const useAddSearchResultToLibrary = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['myBooks'] });
+            queryClient.invalidateQueries({ queryKey: ['home'] });
             queryClient.invalidateQueries({ queryKey: ['ownedIsbns', user?.email] });
             queryClient.invalidateQueries({ queryKey: ['discovery'] });
             const toastOptions = createAppToast({

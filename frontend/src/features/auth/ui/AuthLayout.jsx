@@ -1,12 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import { MdLibraryBooks, MdTimer, MdShowChart } from 'react-icons/md';
-import { GiBookshelf } from 'react-icons/gi';
+import { MdAutoStories, MdTimelapse, MdInsights } from 'react-icons/md';
 import { Card } from '../../../shared/ui/Card';
 import LanguageSwitcher from '../../../app/navigation/LanguageSwitcher';
 import './AuthLayout.css';
 
 export const AuthLayout = ({ children, title, icon, variant = 'default' }) => {
     const { t } = useTranslation();
+
+    const features = [
+        { icon: MdAutoStories, label: 'auth.brand.features.track' },
+        { icon: MdTimelapse, label: 'auth.brand.features.time' },
+        { icon: MdInsights, label: 'auth.brand.features.visualize' },
+    ];
 
     return (
         <div className={`auth-layout auth-layout--${variant}`}>
@@ -15,49 +20,36 @@ export const AuthLayout = ({ children, title, icon, variant = 'default' }) => {
             </div>
 
             <div className="auth-layout__brand">
-                <div className="auth-layout__brand-content">
-                    <span className="auth-layout__brand-kicker">{t('auth.brand.kicker')}</span>
-                    <div className="auth-layout__logo-large">
-                        <span className="auth-layout__icon-wrapper">
-                            <GiBookshelf />
-                        </span>
-                        <span className="auth-layout__brand-name">{t('auth.brand.appName')}</span>
-                    </div>
-                    <p className="auth-layout__tagline">
-                        {t('auth.brand.tagline')}
-                    </p>
+                {/* Top: compact brand lockup */}
+                <div className="auth-layout__brand-header">
+                    <img
+                        src="/mybooktracker.png"
+                        alt=""
+                        className="auth-layout__logo-img"
+                    />
+                    <span className="auth-layout__brand-name">{t('auth.brand.appName')}</span>
+                </div>
 
-                    <div className="auth-layout__journal-card">
-                        <span className="auth-layout__journal-label">{t('auth.brand.journalTitle')}</span>
-                        <p className="auth-layout__journal-copy">{t('auth.brand.journalCopy')}</p>
-                    </div>
+                {/* Center: hero tagline */}
+                <div className="auth-layout__hero">
+                    <h1 className="auth-layout__tagline">{t('auth.brand.tagline')}</h1>
 
                     <ul className="auth-layout__features">
-                        {[
-                            { icon: MdLibraryBooks, title: 'auth.brand.features.track', desc: 'auth.brand.features.trackDesc' },
-                            { icon: MdTimer, title: 'auth.brand.features.time', desc: 'auth.brand.features.timeDesc' },
-                            { icon: MdShowChart, title: 'auth.brand.features.visualize', desc: 'auth.brand.features.visualizeDesc' }
-                        ].map((feature, index) => (
-                            <li key={index}>
-                                <div className="auth-layout__feature-header">
-                                    <feature.icon className="auth-layout__feature-icon" />
-                                    <span>{t(feature.title)}</span>
-                                </div>
-                                <div className="auth-layout__feature-tooltip">
-                                    <div className="auth-layout__tooltip-desc">{t(feature.desc)}</div>
-                                </div>
+                        {features.map((f, i) => (
+                            <li key={i}>
+                                <span className="auth-layout__feature-dot" />
+                                <f.icon className="auth-layout__feature-icon" />
+                                <span>{t(f.label)}</span>
                             </li>
                         ))}
                     </ul>
+                </div>
 
-                    <blockquote className="auth-layout__quote">
-                        <p className="auth-layout__quote-text">{t('auth.brand.quote')}</p>
-                        <footer className="auth-layout__quote-source">{t('auth.brand.quoteSource')}</footer>
-                    </blockquote>
-                </div>
-                <div className="auth-layout__decorative-icon">
-                    <GiBookshelf />
-                </div>
+                {/* Bottom: quote */}
+                <blockquote className="auth-layout__quote">
+                    <p className="auth-layout__quote-text">{t('auth.brand.quote')}</p>
+                    <footer className="auth-layout__quote-source">{t('auth.brand.quoteSource')}</footer>
+                </blockquote>
             </div>
 
             <div className="auth-layout__form-area">
