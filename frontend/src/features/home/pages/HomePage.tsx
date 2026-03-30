@@ -138,7 +138,7 @@ const HomePage = () => {
                 </GridItem>
             </Grid>
 
-            <Grid templateColumns={{ base: '1fr', xl: '1.2fr 0.8fr' }} gap={6}>
+            <Grid templateColumns={{ base: '1fr', xl: '1.55fr 0.95fr' }} gap={6}>
                 <GridItem>
                     <HomeNextUpPanel
                         queuedBooks={queuedBooks}

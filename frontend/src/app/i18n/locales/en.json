@@ -239,18 +239,18 @@
         "errorTitle": "Error",
         "brand": {
             "appName": "MyBookTracker",
-            "tagline": "Your personal cozy reading space.",
+            "tagline": "Your cozy reading space.",
             "kicker": "Reading journal",
             "journalTitle": "For calmer reading days",
             "journalCopy": "MyBookTracker should feel closer to a familiar reading journal than a sterile tool. Warm, clear, and free from unnecessary productivity pressure.",
             "quote": "A good reading ritual begins less with speed and more with the feeling of returning to the right place.",
             "quoteSource": "MyBookTracker Note",
             "features": {
-                "track": "Track your library",
+                "track": "Manage your library",
                 "trackDesc": "Add, remove, and organize the books in your personal collection.",
-                "time": "Time your sessions",
+                "time": "Track reading time",
                 "timeDesc": "Track your daily reading time with a built-in reading timer.",
-                "visualize": "Visualize progress",
+                "visualize": "See your progress",
                 "visualizeDesc": "See your reading habits and progress through beautiful analytics."
             }
         }
