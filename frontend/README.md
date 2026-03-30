@@ -1,6 +1,6 @@
-# ReadWick Frontend
+# MyBookTracker Frontend
 
-React SPA for the ReadWick reading tracker, built with Vite.
+React SPA for the MyBookTracker reading tracker, built with Vite.
 
 ## Tech Stack
 

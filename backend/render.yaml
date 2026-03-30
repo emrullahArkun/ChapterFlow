@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: readwick-api
+    name: mybooktracker-api
     runtime: docker
     region: frankfurt
     plan: free

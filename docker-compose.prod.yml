@@ -1,12 +1,13 @@
 services:
   app:
-    build: ./backend # TODO: Replace with pre-built image from CI/CD pipeline (e.g. image: ghcr.io/emrullaharkun/readwick-backend:latest)
+    image: ${BACKEND_IMAGE:-ghcr.io/emrullaharkun/mybooktracker-backend:latest}
+    pull_policy: always
     depends_on:
       db:
         condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/readwick
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mybooktracker
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - APP_JWT_SECRET=${APP_JWT_SECRET}
@@ -16,7 +17,7 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=readwick
+      - POSTGRES_DB=mybooktracker
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
@@ -29,9 +30,8 @@ services:
     restart: always
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ${FRONTEND_IMAGE:-ghcr.io/emrullaharkun/mybooktracker-frontend:latest}
+    pull_policy: always
     ports:
       - "80:80"
       - "443:443"
