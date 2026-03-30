@@ -28,6 +28,7 @@ const SessionBookSidebar = ({ book, textColor, subTextColor }: SessionBookSideba
 
     return (
         <MotionBox
+            h="full"
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.28 }}
@@ -37,8 +38,9 @@ const SessionBookSidebar = ({ book, textColor, subTextColor }: SessionBookSideba
                 p={5}
                 bg="transparent"
                 border="none"
+                h="full"
             >
-                <VStack spacing={5} align="center" w="full">
+                <VStack spacing={5} align="center" justify="space-between" w="full" h="full">
                     <Badge alignSelf="flex-start" bg="rgba(197, 154, 92, 0.12)" color="#d9bc92">
                         {t('readingSession.currentBook')}
                     </Badge>

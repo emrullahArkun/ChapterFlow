@@ -154,7 +154,7 @@ const ReadingSessionPage = () => {
                     </Text>
                 </Box>
 
-                <Grid templateColumns={{ base: "1fr", lg: focusModeEnabled ? "1fr" : "300px 1fr" }} gap={6} alignItems="start" flex="1" minH="0">
+                <Grid templateColumns={{ base: "1fr", lg: focusModeEnabled ? "1fr" : "300px 1fr" }} gap={6} alignItems="stretch" flex="1" minH="0">
                     {!focusModeEnabled && (
                         <GridItem h="full" overflow="auto" css={{ '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
                             <Box
@@ -164,6 +164,7 @@ const ReadingSessionPage = () => {
                                 borderRadius="2xl"
                                 boxShadow={panelShadow}
                                 p={1}
+                                h="full"
                             >
                                 <SessionBookSidebar
                                     book={book}
@@ -175,7 +176,7 @@ const ReadingSessionPage = () => {
                     )}
 
                     <GridItem w="full" h="full" overflow="auto" css={{ '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
-                        <VStack spacing={5} align="stretch">
+                        <VStack spacing={5} align="stretch" h="full">
                             <SessionTimerCard
                                 cardBg={cardBg}
                                 brandColor={brandColor}

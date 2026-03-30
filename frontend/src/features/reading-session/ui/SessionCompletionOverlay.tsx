@@ -18,6 +18,7 @@ const SessionCompletionOverlay = ({ summary, pageCount }: SessionCompletionOverl
     const maxPage = Math.max(pageCount ?? 0, summary.endPage, summary.startPage, 1);
     const startPercent = Math.max(0, Math.min((summary.startPage / maxPage) * 100, 100));
     const endPercent = Math.max(0, Math.min((summary.endPage / maxPage) * 100, 100));
+    const isZero = summary.pagesRead === 0;
 
     return (
         <MotionBox
@@ -104,7 +105,7 @@ const SessionCompletionOverlay = ({ summary, pageCount }: SessionCompletionOverl
                         <Text
                             fontSize={{ base: '4xl', md: '5xl' }}
                             fontWeight="700"
-                            color={textColor}
+                            color={isZero ? modalMutedText : textColor}
                             lineHeight="1"
                             letterSpacing="-0.04em"
                             fontFamily="heading"
@@ -119,7 +120,9 @@ const SessionCompletionOverlay = ({ summary, pageCount }: SessionCompletionOverl
                             lineHeight="1.1"
                             mt={3}
                         >
-                            {t('readingSession.completion.title')}
+                            {isZero
+                                ? t('readingSession.completion.titleZero')
+                                : t('readingSession.completion.title')}
                         </Text>
                         <Text
                             fontSize="xs"
@@ -129,7 +132,9 @@ const SessionCompletionOverlay = ({ summary, pageCount }: SessionCompletionOverl
                             fontWeight="600"
                             mt={1.5}
                         >
-                            {t('readingSession.completion.subtitle', { pages: summary.pagesRead })}
+                            {isZero
+                                ? t('readingSession.completion.subtitleZero')
+                                : t('readingSession.completion.subtitle', { pages: summary.pagesRead })}
                         </Text>
                     </MotionBox>
 

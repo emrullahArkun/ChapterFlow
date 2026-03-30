@@ -277,7 +277,9 @@
         "completion": {
             "badge": "Session Complete",
             "title": "You made real progress.",
+            "titleZero": "What were you doing this whole time?",
             "subtitle": "This session carried you {{pages}} pages further.",
+            "subtitleZero": "Maybe try opening the book next time.",
             "startLabel": "Page started",
             "endLabel": "Page reached"
         },

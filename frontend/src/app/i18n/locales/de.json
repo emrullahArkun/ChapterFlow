@@ -277,7 +277,9 @@
         "completion": {
             "badge": "Session beendet",
             "title": "Du bist wirklich weitergekommen.",
+            "titleZero": "Was hast du die ganze Zeit gemacht?",
             "subtitle": "Diese Session hat dich {{pages}} Seiten weitergebracht.",
+            "subtitleZero": "Nächstes Mal vielleicht auch das Buch aufschlagen.",
             "startLabel": "Angefangen bei",
             "endLabel": "Erreicht"
         },
