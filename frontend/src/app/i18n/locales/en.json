@@ -1,6 +1,6 @@
 {
     "navbar": {
-        "brand": "ReadWick",
+        "brand": "MyBookTracker",
         "focus": "Home",
         "goals": "My Goals",
         "discovery": "Discover",
@@ -30,9 +30,9 @@
         "achievementProgress": "{{current}}/{{target}} {{unit}}",
         "focusBadge": "Reading Moment",
         "focusTitle": "Start with the book that already matters.",
-        "focusSubtitle": "ReadWick helps you begin, continue, and finish real reading sessions without side quests first.",
+        "focusSubtitle": "MyBookTracker helps you begin, continue, and finish real reading sessions without side quests first.",
         "ledgerTitle": "Reading ledger",
-        "journalLabel": "ReadWick Journal",
+        "journalLabel": "MyBookTracker Journal",
         "focusBookLabel": "Book for now",
         "continueReadingLabel": "Continue reading",
         "todaySuggestion": {
@@ -238,13 +238,13 @@
         "enterPassword": "Enter your password",
         "errorTitle": "Error",
         "brand": {
-            "appName": "ReadWick",
+            "appName": "MyBookTracker",
             "tagline": "Your personal cozy reading space.",
             "kicker": "Reading journal",
             "journalTitle": "For calmer reading days",
-            "journalCopy": "ReadWick should feel closer to a familiar reading journal than a sterile tool. Warm, clear, and free from unnecessary productivity pressure.",
+            "journalCopy": "MyBookTracker should feel closer to a familiar reading journal than a sterile tool. Warm, clear, and free from unnecessary productivity pressure.",
             "quote": "A good reading ritual begins less with speed and more with the feeling of returning to the right place.",
-            "quoteSource": "ReadWick Note",
+            "quoteSource": "MyBookTracker Note",
             "features": {
                 "track": "Track your library",
                 "trackDesc": "Add, remove, and organize the books in your personal collection.",
