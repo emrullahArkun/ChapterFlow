@@ -22,7 +22,7 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
-vi.mock('../../reading-session/model/ReadingSessionContext', () => ({
+vi.mock('../../reading-session', () => ({
     ReadingSessionProvider: ({ children }) => children,
     useReadingSessionContext: () => mockReadingSessionContext(),
 }));
@@ -350,30 +350,30 @@ describe('MyBooks Component', () => {
 
             render(<LibraryPage />, { wrapper: createTestWrapper() });
 
-            expect(await screen.findAllByText('Current 5')).not.toHaveLength(0);
+            expect((await screen.findAllByText('Current 5')).length).toBeGreaterThan(0);
             expect(screen.getAllByText('Next 1')).not.toHaveLength(0);
             expect(screen.getAllByText('1 / 2')).toHaveLength(2);
 
             expect(screen.queryAllByText('Current 1')).toHaveLength(0);
             expect(screen.queryAllByText('Next 5')).toHaveLength(0);
 
-            await user.click(screen.getByLabelText('Next Page Current Reads'));
+            await user.click(screen.getByLabelText('Next page for Current Reads'));
 
             await waitFor(() => {
-                expect(screen.getAllByText('Current 1')).not.toHaveLength(0);
+                expect(screen.getAllByText('Current 1').length).toBeGreaterThan(0);
             });
 
             expect(screen.queryAllByText('Next 5')).toHaveLength(0);
-            expect(screen.getByLabelText('Previous Page Current Reads')).not.toBeDisabled();
-            expect(screen.getByLabelText('Previous Page Waiting for You')).toBeDisabled();
+            expect(screen.getByLabelText('Previous page for Current Reads')).not.toBeDisabled();
+            expect(screen.getByLabelText('Previous page for Waiting for You')).toBeDisabled();
 
-            await user.click(screen.getByLabelText('Next Page Waiting for You'));
+            await user.click(screen.getByLabelText('Next page for Waiting for You'));
 
             await waitFor(() => {
-                expect(screen.getAllByText('Next 5')).not.toHaveLength(0);
+                expect(screen.getAllByText('Next 5').length).toBeGreaterThan(0);
             });
 
-            expect(screen.getAllByText('Current 1')).not.toHaveLength(0);
+            expect(screen.getAllByText('Current 1').length).toBeGreaterThan(0);
         });
 
         it('keeps section pagination visible even when there is only one page', async () => {
@@ -391,8 +391,8 @@ describe('MyBooks Component', () => {
             render(<LibraryPage />, { wrapper: createTestWrapper() });
 
             await screen.findByText('1 / 1');
-            expect(screen.getByLabelText('Previous Page Waiting for You')).toBeDisabled();
-            expect(screen.getByLabelText('Next Page Waiting for You')).toBeDisabled();
+            expect(screen.getByLabelText('Previous page for Waiting for You')).toBeDisabled();
+            expect(screen.getByLabelText('Next page for Waiting for You')).toBeDisabled();
         });
     });
 });

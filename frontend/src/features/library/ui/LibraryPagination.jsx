@@ -12,8 +12,12 @@ function LibraryPagination({
     const { t } = useTranslation();
     const totalPageCount = Math.max(totalPages, 1);
     const currentPage = Math.min(page + 1, totalPageCount);
-    const previousLabel = contextLabel ? `${t('common.previousPage')} ${contextLabel}` : t('common.previousPage');
-    const nextLabel = contextLabel ? `${t('common.nextPage')} ${contextLabel}` : t('common.nextPage');
+    const previousLabel = contextLabel
+        ? t('common.previousPageForSection', { section: contextLabel })
+        : t('common.previousPage');
+    const nextLabel = contextLabel
+        ? t('common.nextPageForSection', { section: contextLabel })
+        : t('common.nextPage');
 
     return (
         <Flex justify="center" align="center" gap={4} minW="140px">

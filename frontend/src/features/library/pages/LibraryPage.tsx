@@ -17,7 +17,7 @@ import MyBookCard from '../ui/MyBookCard';
 import LibraryActionsBar from '../ui/LibraryActionsBar';
 import LibraryEmptyState from '../ui/LibraryEmptyState';
 import LibraryPagination from '../ui/LibraryPagination';
-import { useReadingSessionContext } from '../../reading-session/model/ReadingSessionContext';
+import { useReadingSessionContext } from '../../reading-session';
 import type { Book } from '../../../shared/types/books';
 import { createAppToast } from '../../../shared/ui/AppToast';
 import { useThemeTokens } from '../../../shared/theme/useThemeTokens';

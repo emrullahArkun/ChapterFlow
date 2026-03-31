@@ -359,7 +359,9 @@
         "leave": "Leave",
         "back": "Back",
         "previousPage": "Previous Page",
-        "nextPage": "Next Page"
+        "nextPage": "Next Page",
+        "previousPageForSection": "Previous page for {{section}}",
+        "nextPageForSection": "Next page for {{section}}"
     },
     "discovery": {
         "loading": "Loading recommendations...",

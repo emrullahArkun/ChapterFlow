@@ -359,7 +359,9 @@
         "leave": "Verlassen",
         "back": "Zurück",
         "previousPage": "Vorherige Seite",
-        "nextPage": "Nächste Seite"
+        "nextPage": "Nächste Seite",
+        "previousPageForSection": "Vorherige Seite für {{section}}",
+        "nextPageForSection": "Nächste Seite für {{section}}"
     },
     "discovery": {
         "loading": "Empfehlungen werden geladen...",

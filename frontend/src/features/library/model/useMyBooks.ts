@@ -47,23 +47,31 @@ const createOptimisticMutation = <TVars,>(
 });
 
 const fetchAllBooks = async (): Promise<Book[]> => {
-    const allBooks: Book[] = [];
-    let currentPage = 0;
-    let totalPages = 1;
+    const firstPage = await booksApi.getAll(0, FETCH_PAGE_SIZE);
 
-    while (currentPage < totalPages) {
-        const response = await booksApi.getAll(currentPage, FETCH_PAGE_SIZE);
-
-        if (!response) {
-            return [];
-        }
-
-        allBooks.push(...(response.content || []));
-        totalPages = response.totalPages || 0;
-        currentPage += 1;
+    if (!firstPage) {
+        throw new Error('Failed to load library');
     }
 
-    return allBooks;
+    const totalPages = Math.max(firstPage.totalPages || 0, 1);
+    const firstPageBooks = firstPage.content || [];
+
+    if (totalPages === 1) {
+        return firstPageBooks;
+    }
+
+    const remainingPages = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, index) => booksApi.getAll(index + 1, FETCH_PAGE_SIZE))
+    );
+
+    if (remainingPages.some((page) => !page)) {
+        throw new Error('Failed to load library');
+    }
+
+    return [
+        ...firstPageBooks,
+        ...remainingPages.flatMap((page) => page?.content || []),
+    ];
 };
 
 export const useMyBooks = () => {
