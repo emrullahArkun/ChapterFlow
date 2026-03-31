@@ -174,26 +174,28 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${DEPLOY_PORT:-22}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
 
-      - name: Sync deployment files to Hetzner
+      - name: Sync production compose file to Hetzner
         run: |
-          ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" '
-            set -e
-            mkdir -p /opt/mybooktracker/ops/caddy
-          '
           scp -P "${DEPLOY_PORT:-22}" docker-compose.prod.yml "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/mybooktracker/docker-compose.prod.yml"
-          scp -P "${DEPLOY_PORT:-22}" ops/caddy/Caddyfile "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/mybooktracker/ops/caddy/Caddyfile"
 
       - name: Deploy tagged images on Hetzner
         run: |
           ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" '
             set -e
             cd /opt/mybooktracker
-            export IMAGE_TAG=sha-${{ github.event.workflow_run.head_sha || github.sha }}
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            export DEPLOY_IMAGE_TAG=sha-${{ github.event.workflow_run.head_sha || github.sha }}
 
-            for service in app frontend caddy; do
-              container_id=$(docker compose -f docker-compose.prod.yml ps -q "$service")
+            if grep -q "^IMAGE_TAG=" .env; then
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${DEPLOY_IMAGE_TAG}/" .env
+            else
+              printf "\nIMAGE_TAG=%s\n" "${DEPLOY_IMAGE_TAG}" >> .env
+            fi
+
+            docker compose --env-file .env -f docker-compose.prod.yml pull
+            docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
+
+            for service in app frontend; do
+              container_id=$(docker compose --env-file .env -f docker-compose.prod.yml ps -q "$service")
               if [ -z "$container_id" ]; then
                 echo "Missing container for $service"
                 exit 1
@@ -211,5 +213,5 @@ jobs:
               done
             done
 
-            docker compose -f docker-compose.prod.yml ps
+            docker compose --env-file .env -f docker-compose.prod.yml ps
           '
