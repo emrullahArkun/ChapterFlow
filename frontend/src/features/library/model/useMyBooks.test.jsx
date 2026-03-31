@@ -53,50 +53,31 @@ describe('useMyBooks wrapper tests', () => {
         });
 
         expect(result.current.books[0].title).toBe('Book 1');
-        expect(result.current.totalPages).toBe(1);
-        expect(result.current.page).toBe(0);
         expect(result.current.selectedBooks.size).toBe(0);
     });
 
-    it('should clamp the page when totalPages shrinks after a refetch', async () => {
+    it('should fetch all pages of the library', async () => {
         booksApi.getAll.mockImplementation(async (page) => {
             if (page === 0) {
                 return { content: [{ id: 1, title: 'Page 1 Book' }], totalPages: 3 };
             }
 
-            if (page === 2) {
-                return { content: [], totalPages: 2 };
-            }
-
             if (page === 1) {
-                return { content: [{ id: 2, title: 'Page 2 Book' }], totalPages: 2 };
+                return { content: [{ id: 2, title: 'Page 2 Book' }], totalPages: 3 };
             }
 
-            return { content: [], totalPages: 0 };
+            return { content: [{ id: 3, title: 'Page 3 Book' }], totalPages: 3 };
         });
 
         const { result } = renderHook(() => useMyBooks(), { wrapper });
 
         await waitFor(() => {
-            expect(result.current.totalPages).toBe(3);
+            expect(result.current.books).toHaveLength(3);
         });
 
-        act(() => {
-            result.current.setPage(2);
-        });
-
-        await waitFor(() => {
-            expect(booksApi.getAll).toHaveBeenCalledWith(2, 12);
-        });
-
-        await waitFor(() => {
-            expect(result.current.page).toBe(1);
-        });
-
-        await waitFor(() => {
-            expect(booksApi.getAll).toHaveBeenLastCalledWith(1, 12);
-            expect(result.current.totalPages).toBe(2);
-        });
+        expect(booksApi.getAll).toHaveBeenNthCalledWith(1, 0, 100);
+        expect(booksApi.getAll).toHaveBeenNthCalledWith(2, 1, 100);
+        expect(booksApi.getAll).toHaveBeenNthCalledWith(3, 2, 100);
     });
 
     it('should allow toggling selection', async () => {
@@ -228,7 +209,6 @@ describe('useMyBooks wrapper tests', () => {
         });
 
         expect(result.current.books).toHaveLength(0);
-        expect(result.current.totalPages).toBe(0);
     });
 
     it('should call updateStatus mutation', async () => {
