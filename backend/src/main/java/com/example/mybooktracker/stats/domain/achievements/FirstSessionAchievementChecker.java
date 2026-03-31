@@ -1,9 +1,6 @@
 package com.example.mybooktracker.stats.domain.achievements;
 
-import org.springframework.stereotype.Component;
-
-@Component
-class FirstSessionAchievementChecker implements AchievementChecker {
+public class FirstSessionAchievementChecker implements AchievementChecker {
 
     @Override
     public AchievementType type() {

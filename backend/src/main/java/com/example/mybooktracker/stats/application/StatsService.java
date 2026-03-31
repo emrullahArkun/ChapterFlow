@@ -1,7 +1,7 @@
 package com.example.mybooktracker.stats.application;
 
 import com.example.mybooktracker.auth.domain.User;
-import com.example.mybooktracker.books.infra.persistence.BookRepository;
+import com.example.mybooktracker.books.application.BookQueryPort;
 import com.example.mybooktracker.sessions.domain.ReadingSession;
 import com.example.mybooktracker.sessions.domain.SessionStatus;
 import com.example.mybooktracker.sessions.infra.persistence.ReadingSessionRepository;
@@ -26,7 +26,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class StatsService {
 
-    private final BookRepository bookRepository;
+    private final BookQueryPort bookQueryPort;
     private final ReadingSessionRepository sessionRepository;
     private final StreakService streakService;
     private final Clock clock;
@@ -37,8 +37,8 @@ public class StatsService {
 
     public StatsOverview getOverview(User user, String timezone) {
         ZoneId zoneId = ZoneIdResolver.resolveOrUtc(timezone);
-        long totalBooks = bookRepository.countByUser(user);
-        long completedBooks = bookRepository.countByUserAndCompletedTrue(user);
+        long totalBooks = bookQueryPort.countByUser(user);
+        long completedBooks = bookQueryPort.countCompletedByUser(user);
         long totalPagesRead = sessionRepository.sumPagesReadByUser(user, SessionStatus.COMPLETED);
 
         Instant since = LocalDate.now(clock.withZone(zoneId)).minusYears(1).atStartOfDay(zoneId).toInstant();
@@ -74,7 +74,7 @@ public class StatsService {
     }
 
     private List<GenreStat> buildGenreDistribution(User user) {
-        List<String> categories = bookRepository.findAllCategoriesByUser(user);
+        List<String> categories = bookQueryPort.findAllCategoriesByUser(user);
         Map<String, Integer> counts = new HashMap<>();
         for (String cat : categories) {
             if (cat != null && !cat.isEmpty()) {

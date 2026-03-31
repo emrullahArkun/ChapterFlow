@@ -1,7 +1,7 @@
 package com.example.mybooktracker.stats.application;
 
 import com.example.mybooktracker.auth.domain.User;
-import com.example.mybooktracker.books.infra.persistence.BookRepository;
+import com.example.mybooktracker.books.application.BookQueryPort;
 import com.example.mybooktracker.sessions.infra.persistence.ReadingSessionRepository;
 import com.example.mybooktracker.sessions.domain.ReadingSession;
 import com.example.mybooktracker.sessions.domain.SessionStatus;
@@ -22,14 +22,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AchievementContextFactory {
 
-    private final BookRepository bookRepository;
+    private final BookQueryPort bookQueryPort;
     private final ReadingSessionRepository sessionRepository;
     private final StreakService streakService;
     private final Clock clock;
 
     public AchievementContext build(User user, ZoneId zoneId) {
-        long totalBooks = bookRepository.countByUser(user);
-        long completedBooks = bookRepository.countByUserAndCompletedTrue(user);
+        long totalBooks = bookQueryPort.countByUser(user);
+        long completedBooks = bookQueryPort.countCompletedByUser(user);
         long totalPages = sessionRepository.sumPagesReadByUser(user, SessionStatus.COMPLETED);
         long totalSessions = sessionRepository.countCompletedByUser(user, SessionStatus.COMPLETED);
         StreakInfo streakInfo = streakService.calculateStreaks(user, zoneId);

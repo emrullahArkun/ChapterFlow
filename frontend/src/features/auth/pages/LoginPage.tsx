@@ -20,7 +20,7 @@ type LocationState = {
 function LoginPage() {
     const { t } = useTranslation();
     const [email, setEmail] = useState(import.meta.env.DEV ? 'admin@example.com' : '');
-    const [password, setPassword] = useState(import.meta.env.DEV ? 'password' : '');
+    const [password, setPassword] = useState(import.meta.env.DEV ? 'AdminPassword123' : '');
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation() as ReturnType<typeof useLocation> & { state: LocationState | null };

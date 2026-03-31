@@ -1,10 +1,8 @@
 package com.example.mybooktracker.stats.domain.achievements;
 
-import org.springframework.stereotype.Component;
+public class NightOwlAchievementChecker implements AchievementChecker {
 
-@Component
-class NightOwlAchievementChecker implements AchievementChecker {
-
+    // The helper treats values above 24 as a wrapped range, so 22-28 means 22:00 through 03:59.
     private static final int FROM_HOUR = 22;
     private static final int TO_HOUR = 28;
 

@@ -2,13 +2,10 @@ package com.example.mybooktracker.stats.domain.achievements;
 
 import com.example.mybooktracker.books.domain.Book;
 import com.example.mybooktracker.sessions.domain.ReadingSession;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-@Component
-class SpeedReaderAchievementChecker implements AchievementChecker {
+public class SpeedReaderAchievementChecker implements AchievementChecker {
 
     private static final double SPEED_READ_PAGES_PER_DAY = 50.0;
 

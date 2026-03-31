@@ -1,0 +1,25 @@
+{
+    auto_https off
+}
+
+:80 {
+    encode zstd gzip
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com data:; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+    }
+
+    @api path /api/* /actuator/*
+
+    handle @api {
+        reverse_proxy app:8080
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+}

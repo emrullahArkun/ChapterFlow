@@ -9,8 +9,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -38,6 +42,9 @@ public class SecurityConfig {
 
     @Value("${app.jwt.secret}")
     private String jwtSecret;
+
+    @Value("${app.jwt.issuer}")
+    private String jwtIssuer;
 
     @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}")
     private String[] allowedOrigins;
@@ -67,6 +74,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout").permitAll()
+                        .requestMatchers("/actuator/health/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -80,13 +88,16 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withSecretKey(jwtSigningKey())
-                .macAlgorithm(MacAlgorithm.HS256).build();
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSigningKey())
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
+        decoder.setJwtValidator(jwtValidator());
+        return decoder;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
     /**
@@ -121,7 +132,16 @@ public class SecurityConfig {
     }
 
     private SecretKeySpec jwtSigningKey() {
+        if (jwtSecret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT secret must be at least 32 bytes long for HS256");
+        }
         return new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+    }
+
+    private OAuth2TokenValidator<org.springframework.security.oauth2.jwt.Jwt> jwtValidator() {
+        return new DelegatingOAuth2TokenValidator<>(
+                JwtValidators.createDefault(),
+                new JwtIssuerValidator(jwtIssuer));
     }
 
     private CorsConfiguration corsConfiguration() {

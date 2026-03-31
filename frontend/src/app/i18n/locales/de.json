@@ -232,6 +232,7 @@
         "password": "Passwort",
         "confirmPassword": "Passwort wiederholen",
         "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+        "passwordRequirements": "Verwende 12 bis 72 Zeichen mit mindestens einem Großbuchstaben, einem Kleinbuchstaben und einer Zahl.",
         "required": "Bitte füllen Sie dieses Feld aus",
         "invalidEmail": "Ungültiges E-Mail Format",
         "enterEmail": "E-Mail eingeben",

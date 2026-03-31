@@ -10,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class PrimaryBookMapperTest {
+class BookMapperTest {
 
-    private final PrimaryBookMapper mapper = new PrimaryBookMapper();
+    private final BookMapper mapper = new BookMapper();
 
     @Test
     void toDto_ShouldReturnNull_WhenBookIsNull() {

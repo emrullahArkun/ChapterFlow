@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -40,10 +41,10 @@ class AuthServiceTest {
     @Test
     void registerUser_ShouldCreateUser() {
         when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password")).thenReturn("encoded");
+        when(passwordEncoder.encode("Password1234")).thenReturn("encoded");
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        User user = authService.registerUser("test@example.com", "password");
+        User user = authService.registerUser("test@example.com", "Password1234");
 
         assertEquals("test@example.com", user.getEmail());
         assertEquals("encoded", user.getPassword());
@@ -56,7 +57,17 @@ class AuthServiceTest {
         when(userRepository.existsByEmail("taken@example.com")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class,
-                () -> authService.registerUser("taken@example.com", "password"));
+                () -> authService.registerUser("taken@example.com", "Password1234"));
+    }
+
+    @Test
+    void registerUser_ShouldThrow_WhenPasswordWeak() {
+        when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> authService.registerUser("test@example.com", "password123"));
+
+        assertEquals(PasswordPolicy.USER_FACING_MESSAGE, exception.getMessage());
     }
 
     // --- login ---
@@ -65,9 +76,9 @@ class AuthServiceTest {
     void login_ShouldReturnUser_WhenCredentialsValid() {
         User user = new User("test@example.com", "encoded", Role.USER);
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password", "encoded")).thenReturn(true);
+        when(passwordEncoder.matches("Password1234", "encoded")).thenReturn(true);
 
-        User result = authService.login("test@example.com", "password");
+        User result = authService.login("test@example.com", "Password1234");
         assertEquals("test@example.com", result.getEmail());
     }
 
@@ -77,7 +88,7 @@ class AuthServiceTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         assertThrows(InvalidCredentialsException.class,
-                () -> authService.login("missing@example.com", "password"));
+                () -> authService.login("missing@example.com", "Password1234"));
     }
 
     @Test
@@ -91,14 +102,33 @@ class AuthServiceTest {
     }
 
     @Test
+    void login_ShouldThrow_WhenEmailHasNoAtSign() {
+        when(userRepository.findByEmail("invalid-email")).thenReturn(Optional.empty());
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        assertThrows(InvalidCredentialsException.class,
+                () -> authService.login("invalid-email", "Password1234"));
+    }
+
+    @Test
+    void login_ShouldThrow_WhenEmailPrefixIsShort() {
+        User user = new User("ab@example.com", "encoded", Role.USER);
+        when(userRepository.findByEmail("ab@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", "encoded")).thenReturn(false);
+
+        assertThrows(InvalidCredentialsException.class,
+                () -> authService.login("ab@example.com", "wrong"));
+    }
+
+    @Test
     void login_ShouldThrow_WhenUserDisabled() {
         User user = new User("test@example.com", "encoded", Role.USER);
         user.setEnabled(false);
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password", "encoded")).thenReturn(true);
+        when(passwordEncoder.matches("Password1234", "encoded")).thenReturn(true);
 
         assertThrows(InvalidCredentialsException.class,
-                () -> authService.login("test@example.com", "password"));
+                () -> authService.login("test@example.com", "Password1234"));
     }
 
     // --- getUserByEmail ---
@@ -117,5 +147,12 @@ class AuthServiceTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> authService.getUserByEmail("missing@example.com"));
+    }
+
+    @Test
+    void maskEmail_ShouldReturnMaskedPlaceholder_WhenEmailIsNull() {
+        String masked = (String) ReflectionTestUtils.invokeMethod(authService, "maskEmail", (String) null);
+
+        assertEquals("***@***", masked);
     }
 }

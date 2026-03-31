@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../../auth/model';
-import { booksApi } from '../../library/api';
-import { useGoalsData } from '../../goals/model/useGoalsData';
-import { useReadingSessionContext } from '../../reading-session/model/ReadingSessionContext';
-import statsApi from '../../stats/api/statsApi';
+import { useAuth } from '../../auth';
+import { useGoalsData } from '../../goals';
+import { booksApi } from '../../library';
+import { useReadingSessionContext } from '../../reading-session';
+import { statsApi } from '../../stats';
+import { formatLocalDate } from '../../../shared/lib/date';
 import type { Book } from '../../../shared/types/books';
 import type { DailyActivity } from '../../../shared/types/stats';
 import {
@@ -65,7 +66,7 @@ const buildWeekDays = (dailyActivity: DailyActivity[]): WeekDay[] => {
     return Array.from({ length: 7 }, (_, i) => {
         const day = new Date(monday);
         day.setDate(monday.getDate() + i);
-        const dateStr = day.toISOString().slice(0, 10);
+        const dateStr = formatLocalDate(day);
         return { date: dateStr, pagesRead: activityMap.get(dateStr) || 0 };
     });
 };
@@ -79,8 +80,10 @@ type LastActivity = {
 const getLastActivity = (dailyActivity: DailyActivity[], books: Book[]): LastActivity => {
     if (dailyActivity.length === 0) return { type: 'none' };
 
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const today = formatLocalDate(new Date());
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = formatLocalDate(yesterdayDate);
 
     const todayEntry = dailyActivity.find((d) => d.date === today);
     const yesterdayEntry = dailyActivity.find((d) => d.date === yesterday);

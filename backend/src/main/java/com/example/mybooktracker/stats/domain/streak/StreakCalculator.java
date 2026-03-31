@@ -1,11 +1,8 @@
 package com.example.mybooktracker.stats.domain.streak;
 
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.util.List;
 
-@Component
 public class StreakCalculator {
 
     public StreakInfo calculate(List<LocalDate> readingDays, LocalDate today) {

@@ -12,6 +12,8 @@ import { Button } from '../../../shared/ui/Button';
 import { createAppToast } from '../../../shared/ui/AppToast';
 import styles from './RegisterPage.module.css';
 
+const PASSWORD_POLICY = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,72}$/;
+
 const linkStyle: CSSProperties = {
     color: '#f3c785',
     fontWeight: 600,
@@ -27,6 +29,7 @@ type RegisterFormErrors = {
 
 function RegisterPage() {
     const { t } = useTranslation();
+    const passwordHintId = 'register-password-hint';
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -44,7 +47,11 @@ function RegisterPage() {
             newErrors.email = t('auth.invalidEmail');
         }
 
-        if (!password) newErrors.password = t('auth.required');
+        if (!password) {
+            newErrors.password = t('auth.required');
+        } else if (!PASSWORD_POLICY.test(password)) {
+            newErrors.password = t('auth.passwordRequirements');
+        }
         if (!confirmPassword) newErrors.confirmPassword = t('auth.required');
         if (password && confirmPassword && password !== confirmPassword) {
             newErrors.confirmPassword = t('auth.passwordsDoNotMatch');
@@ -133,7 +140,9 @@ function RegisterPage() {
                         error={errors.password}
                         required
                         autoComplete="new-password"
+                        aria-describedby={passwordHintId}
                     />
+                    <p id={passwordHintId} className={styles.passwordHint}>{t('auth.passwordRequirements')}</p>
 
                     <TextField
                         label={t('auth.confirmPassword')}

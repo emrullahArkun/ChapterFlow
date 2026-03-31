@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class PrimaryCreateBookCommandMapperTest {
+class CreateBookCommandMapperTest {
 
-    private final PrimaryCreateBookCommandMapper mapper = new PrimaryCreateBookCommandMapper();
+    private final CreateBookCommandMapper mapper = new CreateBookCommandMapper();
 
     @Test
     void toEntity_ShouldReturnNull_WhenCommandIsNull() {

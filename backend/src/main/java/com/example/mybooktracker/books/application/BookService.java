@@ -65,7 +65,7 @@ public class BookService {
         }
 
         Book book = createBookCommandMapper.toEntity(command);
-        book.setUser(user);
+        book.assignToUser(user);
         applyDefaults(book);
 
         try {
@@ -108,21 +108,12 @@ public class BookService {
     public Book updateReadingGoal(@NotNull Long id, ReadingGoalType type, Integer pages, User user) {
         Book book = getBookByIdOrThrow(id, user);
 
-        book.setReadingGoalType(type);
-        book.setReadingGoalPages(pages);
+        book.updateReadingGoal(type, pages);
         return book;
     }
 
     private void applyDefaults(Book book) {
-        if (book.getCurrentPage() == null) {
-            book.setCurrentPage(0);
-        }
-        if (book.getStartDate() == null) {
-            book.setStartDate(LocalDate.now(clock));
-        }
-        if (book.getCompleted() == null) {
-            book.setCompleted(false);
-        }
+        book.initializeTracking(LocalDate.now(clock));
     }
 
     private DuplicateResourceException duplicateIsbnException(String isbn) {

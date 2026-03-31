@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - dev
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'LICENSE'
+
+concurrency:
+  group: auto-pr-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   create-pr:

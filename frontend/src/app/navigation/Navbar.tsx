@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useMatch } from 'react-router-dom';
 import { FaBook, FaSignOutAlt, FaSignInAlt, FaBars, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../features/auth/model';
+import { useAuth } from '../../features/auth';
+import { useReadingSessionContext } from '../../features/reading-session';
 import { useAnimation } from '../providers/AnimationProvider';
-import { useReadingSessionContext } from '../../features/reading-session/model/ReadingSessionContext';
 import { ROUTES } from '../router/routes';
 import LanguageSwitcher from './LanguageSwitcher';
 import './Navbar.css';
 
-function Navbar({ sessionMode = false }) {
+function Navbar({ sessionMode = false }: { sessionMode?: boolean }) {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -31,7 +31,7 @@ function Navbar({ sessionMode = false }) {
         navigate(ROUTES.LOGIN);
     };
 
-    const isActive = (path) => {
+    const isActive = (path: string) => {
         if (path === ROUTES.HOME) return location.pathname === ROUTES.HOME;
         if (path === ROUTES.SEARCH) return location.pathname === ROUTES.SEARCH;
         return location.pathname === path;

@@ -10,6 +10,10 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 permissions:
   contents: read
   packages: write
@@ -71,7 +75,7 @@ jobs:
           images: ghcr.io/${{ needs.prepare.outputs.owner_lc }}/mybooktracker-backend
           tags: |
             type=raw,value=latest
-            type=sha
+            type=raw,value=sha-${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
@@ -121,7 +125,7 @@ jobs:
           images: ghcr.io/${{ needs.prepare.outputs.owner_lc }}/mybooktracker-frontend
           tags: |
             type=raw,value=latest
-            type=sha
+            type=raw,value=sha-${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -166,12 +170,33 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${DEPLOY_PORT:-22}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
 
-      - name: Deploy latest images on Hetzner
+      - name: Deploy tagged images on Hetzner
         run: |
           ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" '
             set -e
             cd /opt/mybooktracker
+            export IMAGE_TAG=sha-${{ github.event.workflow_run.head_sha || github.sha }}
             docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            for service in app frontend caddy; do
+              container_id=$(docker compose -f docker-compose.prod.yml ps -q "$service")
+              if [ -z "$container_id" ]; then
+                echo "Missing container for $service"
+                exit 1
+              fi
+
+              attempt=0
+              until [ "$(docker inspect --format '\''{{if .State.Health}}{{.State.Health.Status}}{{else}}starting{{end}}'\'' "$container_id")" = "healthy" ]; do
+                attempt=$((attempt + 1))
+                if [ "$attempt" -ge 24 ]; then
+                  echo "$service did not become healthy in time"
+                  docker inspect "$container_id"
+                  exit 1
+                fi
+                sleep 5
+              done
+            done
+
             docker compose -f docker-compose.prod.yml ps
           '

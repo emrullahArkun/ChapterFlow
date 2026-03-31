@@ -51,6 +51,16 @@ class CookieBearerTokenResolverTest {
     }
 
     @Test
+    void resolve_ShouldReturnNull_WhenJwtCookieValueIsNull() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        Cookie jwt = new Cookie("jwt", "placeholder");
+        jwt.setValue(null);
+        request.setCookies(jwt);
+
+        assertNull(resolver.resolve(request));
+    }
+
+    @Test
     void resolve_ShouldReturnToken_WhenMultipleCookiesPresent() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setCookies(

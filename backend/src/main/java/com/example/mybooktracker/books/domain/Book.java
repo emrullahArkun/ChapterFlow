@@ -74,6 +74,38 @@ public class Book {
         session.setBook(null);
     }
 
+    public void assignToUser(User user) {
+        this.user = user;
+    }
+
+    public void replaceCategories(List<String> categories) {
+        this.categories = categories == null ? new ArrayList<>() : new ArrayList<>(categories);
+    }
+
+    public void updateReadingGoal(ReadingGoalType type, Integer pages) {
+        if (type == null && pages != null) {
+            throw new IllegalArgumentException("Reading goal pages require a reading goal type");
+        }
+        if (pages != null && pages <= 0) {
+            throw new IllegalArgumentException("Reading goal pages must be positive");
+        }
+
+        this.readingGoalType = type;
+        this.readingGoalPages = pages;
+    }
+
+    public void initializeTracking(LocalDate today) {
+        if (this.currentPage == null) {
+            this.currentPage = 0;
+        }
+        if (this.startDate == null) {
+            this.startDate = today;
+        }
+        if (this.completed == null) {
+            this.completed = false;
+        }
+    }
+
     public void updateProgress(Integer newPage) {
         if (newPage == null) {
             throw new IllegalArgumentException("Current page is required");
@@ -103,11 +135,6 @@ public class Book {
     // Set sensible defaults before first save
     @PrePersist
     public void prePersist() {
-        if (currentPage == null) {
-            currentPage = 0;
-        }
-        if (completed == null) {
-            completed = false;
-        }
+        initializeTracking(null);
     }
 }

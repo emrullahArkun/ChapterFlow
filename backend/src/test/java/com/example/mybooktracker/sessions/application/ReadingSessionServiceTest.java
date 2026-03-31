@@ -2,10 +2,9 @@ package com.example.mybooktracker.sessions.application;
 
 import com.example.mybooktracker.books.domain.Book;
 import com.example.mybooktracker.auth.domain.User;
+import com.example.mybooktracker.books.application.BookQueryPort;
 import com.example.mybooktracker.shared.exception.IllegalSessionStateException;
 import com.example.mybooktracker.shared.exception.ResourceNotFoundException;
-
-import com.example.mybooktracker.books.infra.persistence.BookRepository;
 import com.example.mybooktracker.sessions.domain.ReadingSession;
 import com.example.mybooktracker.sessions.domain.SessionStatus;
 import com.example.mybooktracker.sessions.infra.persistence.ReadingSessionRepository;
@@ -32,7 +31,7 @@ class ReadingSessionServiceTest {
     @Mock
     private ReadingSessionRepository sessionRepository;
     @Mock
-    private BookRepository bookRepository;
+    private BookQueryPort bookQueryPort;
     @Spy
     private Clock clock = Clock.systemUTC();
     @InjectMocks
@@ -57,7 +56,7 @@ class ReadingSessionServiceTest {
     void startSession_ShouldCreateNewSession() {
         when(sessionRepository.findFirstByUserAndStatusInOrderByStartTimeDesc(eq(user), anyList()))
                 .thenReturn(Optional.empty());
-        when(bookRepository.findByIdAndUser(10L, user)).thenReturn(Optional.of(book));
+        when(bookQueryPort.findByIdAndUser(10L, user)).thenReturn(Optional.of(book));
         when(sessionRepository.save(any(ReadingSession.class))).thenAnswer(i -> i.getArgument(0));
 
         ReadingSession result = sessionService.startSession(user, 10L);
@@ -103,7 +102,7 @@ class ReadingSessionServiceTest {
 
         when(sessionRepository.findFirstByUserAndStatusInOrderByStartTimeDesc(eq(user), anyList()))
                 .thenReturn(Optional.of(existing));
-        when(bookRepository.findByIdAndUser(10L, user)).thenReturn(Optional.of(book));
+        when(bookQueryPort.findByIdAndUser(10L, user)).thenReturn(Optional.of(book));
         when(sessionRepository.save(any(ReadingSession.class))).thenAnswer(i -> i.getArgument(0));
 
         ReadingSession result = sessionService.startSession(user, 10L);
@@ -115,7 +114,7 @@ class ReadingSessionServiceTest {
     void startSession_ShouldThrow_WhenBookNotFound() {
         when(sessionRepository.findFirstByUserAndStatusInOrderByStartTimeDesc(eq(user), anyList()))
                 .thenReturn(Optional.empty());
-        when(bookRepository.findByIdAndUser(10L, user)).thenReturn(Optional.empty());
+        when(bookQueryPort.findByIdAndUser(10L, user)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> sessionService.startSession(user, 10L));
     }
@@ -131,7 +130,7 @@ class ReadingSessionServiceTest {
 
         when(sessionRepository.findFirstByUserAndStatusInOrderByStartTimeDesc(eq(user), anyList()))
                 .thenReturn(Optional.of(existing));
-        when(bookRepository.findByIdAndUser(10L, user)).thenReturn(Optional.empty());
+        when(bookQueryPort.findByIdAndUser(10L, user)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> sessionService.startSession(user, 10L));
         assertEquals(SessionStatus.ACTIVE, existing.getStatus());
@@ -375,7 +374,7 @@ class ReadingSessionServiceTest {
 
     @Test
     void getSessionsByBook_ShouldReturnSessions() {
-        when(bookRepository.findByIdAndUser(10L, user)).thenReturn(Optional.of(book));
+        when(bookQueryPort.findByIdAndUser(10L, user)).thenReturn(Optional.of(book));
         when(sessionRepository.findByUserAndBook(user, book)).thenReturn(List.of(new ReadingSession()));
 
         List<ReadingSession> result = sessionService.getSessionsByBook(user, 10L);
@@ -384,7 +383,7 @@ class ReadingSessionServiceTest {
 
     @Test
     void getSessionsByBook_ShouldThrow_WhenBookNotFound() {
-        when(bookRepository.findByIdAndUser(10L, user)).thenReturn(Optional.empty());
+        when(bookQueryPort.findByIdAndUser(10L, user)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> sessionService.getSessionsByBook(user, 10L));

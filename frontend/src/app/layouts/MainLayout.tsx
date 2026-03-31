@@ -2,8 +2,8 @@ import { Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { Box, Flex } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useReadingSessionContext } from '../../features/reading-session';
 import Navbar from '../navigation/Navbar';
-import { useReadingSessionContext } from '../../features/reading-session/model/ReadingSessionContext';
 import { ROUTES } from '../router/routes';
 
 const MotionBox = motion(Box);

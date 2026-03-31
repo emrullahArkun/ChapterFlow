@@ -232,6 +232,7 @@
         "password": "Password",
         "confirmPassword": "Confirm Password",
         "passwordsDoNotMatch": "Passwords do not match",
+        "passwordRequirements": "Use 12 to 72 characters with at least one uppercase letter, one lowercase letter, and one number.",
         "required": "Please fill out this field",
         "invalidEmail": "Invalid email format",
         "enterEmail": "Enter your email",

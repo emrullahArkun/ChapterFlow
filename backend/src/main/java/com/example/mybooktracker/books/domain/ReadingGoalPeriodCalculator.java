@@ -1,14 +1,11 @@
 package com.example.mybooktracker.books.domain;
 
-import org.springframework.stereotype.Component;
-
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 
-@Component
 public class ReadingGoalPeriodCalculator {
 
     public Instant getStartOfPeriod(ReadingGoalType goalType, Clock clock) {

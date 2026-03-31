@@ -1,22 +1,30 @@
 package com.example.mybooktracker.books.application;
 
 import com.example.mybooktracker.books.domain.Book;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface CreateBookCommandMapper {
+import java.util.ArrayList;
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "author", source = "authorName")
-    @Mapping(target = "currentPage", ignore = true)
-    @Mapping(target = "startDate", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "completed", ignore = true)
-    @Mapping(target = "readingGoalType", ignore = true)
-    @Mapping(target = "readingGoalPages", ignore = true)
-    @Mapping(target = "readingSessions", ignore = true)
-    Book toEntity(CreateBookCommand command);
+@Component
+public class CreateBookCommandMapper {
+
+    public Book toEntity(CreateBookCommand command) {
+        if (command == null) {
+            return null;
+        }
+
+        Book book = new Book();
+        book.setAuthor(command.authorName());
+        book.setIsbn(command.isbn());
+        book.setTitle(command.title());
+        book.setPublishYear(command.publishYear());
+        book.setCoverUrl(command.coverUrl());
+        book.setPageCount(command.pageCount());
+
+        if (command.categories() != null) {
+            book.replaceCategories(new ArrayList<>(command.categories()));
+        }
+
+        return book;
+    }
 }
