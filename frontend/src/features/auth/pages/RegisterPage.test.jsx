@@ -72,7 +72,7 @@ describe('RegisterPage', () => {
 
     it('should show error for empty email', async () => {
         render(<MemoryRouter><RegisterPage /></MemoryRouter>);
-        fillForm('', 'pass', 'pass');
+        fillForm('', 'Password1234', 'Password1234');
         fireEvent.click(screen.getByText('auth.register.button'));
 
         expect(screen.getByText('auth.required')).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('RegisterPage', () => {
 
     it('should show error for invalid email', async () => {
         render(<MemoryRouter><RegisterPage /></MemoryRouter>);
-        fillForm('invalid', 'pass', 'pass');
+        fillForm('invalid', 'Password1234', 'Password1234');
         fireEvent.click(screen.getByText('auth.register.button'));
 
         expect(screen.getByText('auth.invalidEmail')).toBeInTheDocument();
@@ -88,15 +88,23 @@ describe('RegisterPage', () => {
 
     it('should show error for empty password', async () => {
         render(<MemoryRouter><RegisterPage /></MemoryRouter>);
-        fillForm('a@b.com', '', 'pass');
+        fillForm('a@b.com', '', 'Password1234');
         fireEvent.click(screen.getByText('auth.register.button'));
 
         expect(screen.getAllByText('auth.required').length).toBeGreaterThan(0);
     });
 
+    it('should show error for weak password', async () => {
+        render(<MemoryRouter><RegisterPage /></MemoryRouter>);
+        fillForm('a@b.com', 'password123', 'password123');
+        fireEvent.click(screen.getByText('auth.register.button'));
+
+        expect(screen.getAllByText('auth.passwordRequirements').length).toBeGreaterThan(0);
+    });
+
     it('should show error when passwords do not match', async () => {
         render(<MemoryRouter><RegisterPage /></MemoryRouter>);
-        fillForm('a@b.com', 'pass1', 'pass2');
+        fillForm('a@b.com', 'Password1234', 'Password1235');
         fireEvent.click(screen.getByText('auth.register.button'));
 
         expect(screen.getByText('auth.passwordsDoNotMatch')).toBeInTheDocument();
@@ -106,11 +114,11 @@ describe('RegisterPage', () => {
         authApi.register.mockResolvedValue({});
 
         render(<MemoryRouter><RegisterPage /></MemoryRouter>);
-        fillForm('a@b.com', 'pass', 'pass');
+        fillForm('a@b.com', 'Password1234', 'Password1234');
         fireEvent.click(screen.getByText('auth.register.button'));
 
         await waitFor(() => {
-            expect(authApi.register).toHaveBeenCalledWith('a@b.com', 'pass');
+            expect(authApi.register).toHaveBeenCalledWith('a@b.com', 'Password1234');
             expect(mockNavigate).toHaveBeenCalledWith('/login');
         });
     });
@@ -119,7 +127,7 @@ describe('RegisterPage', () => {
         authApi.register.mockRejectedValue(new Error('Email taken'));
 
         render(<MemoryRouter><RegisterPage /></MemoryRouter>);
-        fillForm('a@b.com', 'pass', 'pass');
+        fillForm('a@b.com', 'Password1234', 'Password1234');
         fireEvent.click(screen.getByText('auth.register.button'));
 
         await waitFor(() => {

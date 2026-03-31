@@ -38,6 +38,9 @@ public class AuthService {
         if (userRepository.existsByEmail(normalized)) {
             throw new DuplicateResourceException("Email already taken");
         }
+        if (!PasswordPolicy.isValid(password)) {
+            throw new IllegalArgumentException(PasswordPolicy.USER_FACING_MESSAGE);
+        }
 
         User user = new User();
         user.setEmail(normalized);

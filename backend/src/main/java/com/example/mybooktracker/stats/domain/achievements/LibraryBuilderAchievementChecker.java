@@ -1,9 +1,6 @@
 package com.example.mybooktracker.stats.domain.achievements;
 
-import org.springframework.stereotype.Component;
-
-@Component
-class LibraryBuilderAchievementChecker extends ThresholdAchievementChecker {
+public class LibraryBuilderAchievementChecker extends ThresholdAchievementChecker {
 
     @Override
     public AchievementType type() {

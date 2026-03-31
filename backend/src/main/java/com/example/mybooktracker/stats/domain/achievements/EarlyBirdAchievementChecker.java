@@ -1,9 +1,6 @@
 package com.example.mybooktracker.stats.domain.achievements;
 
-import org.springframework.stereotype.Component;
-
-@Component
-class EarlyBirdAchievementChecker implements AchievementChecker {
+public class EarlyBirdAchievementChecker implements AchievementChecker {
 
     private static final int FROM_HOUR = 5;
     private static final int TO_HOUR = 8;

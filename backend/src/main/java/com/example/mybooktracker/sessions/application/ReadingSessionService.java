@@ -1,8 +1,8 @@
 package com.example.mybooktracker.sessions.application;
 
 import com.example.mybooktracker.auth.domain.User;
+import com.example.mybooktracker.books.application.BookQueryPort;
 import com.example.mybooktracker.books.domain.Book;
-import com.example.mybooktracker.books.infra.persistence.BookRepository;
 import com.example.mybooktracker.sessions.domain.ReadingSession;
 import com.example.mybooktracker.sessions.domain.SessionStatus;
 import com.example.mybooktracker.sessions.infra.persistence.ReadingSessionRepository;
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class ReadingSessionService {
 
     private final ReadingSessionRepository sessionRepository;
-    private final BookRepository bookRepository;
+    private final BookQueryPort bookQueryPort;
     private final Clock clock;
 
     @Transactional
@@ -41,7 +41,7 @@ public class ReadingSessionService {
             }
         }
 
-        Book book = bookRepository.findByIdAndUser(bookId, user)
+        Book book = bookQueryPort.findByIdAndUser(bookId, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found or access denied"));
 
         existingOpt.ifPresent(existing -> existing.finish(Instant.now(clock), null));
@@ -104,7 +104,7 @@ public class ReadingSessionService {
     }
 
     public List<ReadingSession> getSessionsByBook(User user, Long bookId) {
-        Book book = bookRepository.findByIdAndUser(bookId, user)
+        Book book = bookQueryPort.findByIdAndUser(bookId, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
         return sessionRepository.findByUserAndBook(user, book);
     }

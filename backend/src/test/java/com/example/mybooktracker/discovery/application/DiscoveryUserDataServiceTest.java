@@ -1,7 +1,7 @@
 package com.example.mybooktracker.discovery.application;
 
 import com.example.mybooktracker.auth.domain.User;
-import com.example.mybooktracker.books.infra.persistence.BookRepository;
+import com.example.mybooktracker.books.application.BookQueryPort;
 import com.example.mybooktracker.discovery.domain.DiscoverySnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,8 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +23,7 @@ class DiscoveryUserDataServiceTest {
     private SearchHistoryService searchHistoryService;
 
     @Mock
-    private BookRepository bookRepository;
+    private BookQueryPort bookQueryPort;
 
     @InjectMocks
     private DiscoveryUserDataService userDataService;
@@ -40,7 +38,7 @@ class DiscoveryUserDataServiceTest {
 
     @Test
     void getTopAuthors_ShouldReturnLimitedList() {
-        when(bookRepository.findTopAuthorsByUser(user, PageRequest.of(0, 2))).thenReturn(List.of("A", "B"));
+        when(bookQueryPort.findTopAuthorsByUser(user, 2)).thenReturn(List.of("A", "B"));
 
         List<String> result = userDataService.getTopAuthors(user, 2);
 
@@ -49,7 +47,7 @@ class DiscoveryUserDataServiceTest {
 
     @Test
     void getTopCategories_ShouldReturnLimitedList() {
-        when(bookRepository.findTopCategoriesByUser(user, PageRequest.of(0, 2))).thenReturn(List.of("Thriller", "Krimi"));
+        when(bookQueryPort.findTopCategoriesByUser(user, 2)).thenReturn(List.of("Thriller", "Krimi"));
 
         List<String> result = userDataService.getTopCategories(user, 2);
 
@@ -58,7 +56,7 @@ class DiscoveryUserDataServiceTest {
 
     @Test
     void getOwnedIsbns_ShouldReturnSet() {
-        when(bookRepository.findAllIsbnsByUser(user)).thenReturn(List.of("isbn1", "isbn2"));
+        when(bookQueryPort.findAllIsbnsByUser(user)).thenReturn(List.of("isbn1", "isbn2"));
 
         Set<String> result = userDataService.getOwnedIsbns(user);
 
@@ -68,9 +66,9 @@ class DiscoveryUserDataServiceTest {
 
     @Test
     void getSnapshot_ShouldCombineUserDiscoveryData() {
-        when(bookRepository.findAllIsbnsByUser(user)).thenReturn(List.of("isbn1"));
-        when(bookRepository.findTopAuthorsByUser(user, PageRequest.of(0, 3))).thenReturn(List.of("Author1"));
-        when(bookRepository.findTopCategoriesByUser(user, PageRequest.of(0, 3))).thenReturn(List.of("Cat1"));
+        when(bookQueryPort.findAllIsbnsByUser(user)).thenReturn(List.of("isbn1"));
+        when(bookQueryPort.findTopAuthorsByUser(user, 3)).thenReturn(List.of("Author1"));
+        when(bookQueryPort.findTopCategoriesByUser(user, 3)).thenReturn(List.of("Cat1"));
         when(searchHistoryService.getRecentSearches(user, 5)).thenReturn(List.of("query1"));
 
         DiscoverySnapshot snapshot = userDataService.getSnapshot(user, 3, 5);

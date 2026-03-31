@@ -12,6 +12,8 @@ import { Button } from '../../../shared/ui/Button';
 import { createAppToast } from '../../../shared/ui/AppToast';
 import styles from './RegisterPage.module.css';
 
+const PASSWORD_POLICY = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,72}$/;
+
 const linkStyle: CSSProperties = {
     color: '#f3c785',
     fontWeight: 600,
@@ -44,7 +46,11 @@ function RegisterPage() {
             newErrors.email = t('auth.invalidEmail');
         }
 
-        if (!password) newErrors.password = t('auth.required');
+        if (!password) {
+            newErrors.password = t('auth.required');
+        } else if (!PASSWORD_POLICY.test(password)) {
+            newErrors.password = t('auth.passwordRequirements');
+        }
         if (!confirmPassword) newErrors.confirmPassword = t('auth.required');
         if (password && confirmPassword && password !== confirmPassword) {
             newErrors.confirmPassword = t('auth.passwordsDoNotMatch');
@@ -134,6 +140,7 @@ function RegisterPage() {
                         required
                         autoComplete="new-password"
                     />
+                    <p className={styles.passwordHint}>{t('auth.passwordRequirements')}</p>
 
                     <TextField
                         label={t('auth.confirmPassword')}

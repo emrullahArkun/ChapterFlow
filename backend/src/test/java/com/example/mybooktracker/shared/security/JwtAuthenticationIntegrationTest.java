@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +55,9 @@ class JwtAuthenticationIntegrationTest {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
+    @Value("${app.jwt.issuer}")
+    private String jwtIssuer;
+
     private User testUser;
 
     @BeforeEach
@@ -64,7 +68,7 @@ class JwtAuthenticationIntegrationTest {
 
         testUser = new User();
         testUser.setEmail("auth-test@example.com");
-        testUser.setPassword(passwordEncoder.encode("password"));
+        testUser.setPassword(passwordEncoder.encode("Password1234"));
         testUser.setRole(Role.USER);
         testUser.setEnabled(true);
         testUser = userRepository.save(testUser);
@@ -81,10 +85,19 @@ class JwtAuthenticationIntegrationTest {
 
     @Test
     void expiredJwtCookie_ShouldReturn401() throws Exception {
-        String expiredToken = createExpiredToken(testUser);
+        String expiredToken = createToken(testUser, jwtIssuer, Instant.now().minusSeconds(7200), 3600);
 
         mockMvc.perform(get("/api/sessions/active")
                 .cookie(new Cookie("jwt", expiredToken)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void wrongIssuerJwtCookie_ShouldReturn401() throws Exception {
+        String token = createToken(testUser, "unexpected-issuer", Instant.now(), 3600);
+
+        mockMvc.perform(get("/api/sessions/active")
+                .cookie(new Cookie("jwt", token)))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -119,15 +132,17 @@ class JwtAuthenticationIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    private String createExpiredToken(User user) {
+    private String createToken(User user, String issuer, Instant issuedAt, long ttlSeconds) {
         try {
-            Instant past = Instant.now().minusSeconds(7200);
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                     .subject(user.getEmail())
                     .claim("userId", user.getId())
                     .claim("role", user.getRole().name())
-                    .issueTime(Date.from(past))
-                    .expirationTime(Date.from(past.plusSeconds(3600))) // expired 1h ago
+                    .issuer(issuer)
+                    .jwtID(UUID.randomUUID().toString())
+                    .issueTime(Date.from(issuedAt))
+                    .notBeforeTime(Date.from(issuedAt))
+                    .expirationTime(Date.from(issuedAt.plusSeconds(ttlSeconds)))
                     .build();
 
             SignedJWT signedJWT = new SignedJWT(

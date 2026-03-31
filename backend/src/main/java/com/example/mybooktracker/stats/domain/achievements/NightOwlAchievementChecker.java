@@ -1,9 +1,6 @@
 package com.example.mybooktracker.stats.domain.achievements;
 
-import org.springframework.stereotype.Component;
-
-@Component
-class NightOwlAchievementChecker implements AchievementChecker {
+public class NightOwlAchievementChecker implements AchievementChecker {
 
     private static final int FROM_HOUR = 22;
     private static final int TO_HOUR = 28;

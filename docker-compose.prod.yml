@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${BACKEND_IMAGE:-ghcr.io/emrullaharkun/mybooktracker-backend:latest}
+    image: ghcr.io/emrullaharkun/mybooktracker-backend:${IMAGE_TAG:-latest}
     pull_policy: always
     depends_on:
       db:
@@ -11,10 +11,16 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - APP_JWT_SECRET=${APP_JWT_SECRET}
-      - APP_JWT_COOKIE_SECURE=${APP_JWT_COOKIE_SECURE:-true}
+      - APP_JWT_COOKIE_SECURE=${APP_JWT_COOKIE_SECURE:-false}
       - APP_CORS_ORIGINS=${APP_CORS_ORIGINS}
       - APP_DISCOVERY_PROVIDER=${APP_DISCOVERY_PROVIDER:-google-books}
       - APP_GOOGLE_BOOKS_API_KEY=${APP_GOOGLE_BOOKS_API_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:8080/actuator/health/readiness | grep -q '\"status\":\"UP\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     restart: always
 
   db:
@@ -33,16 +39,41 @@ services:
     restart: always
 
   frontend:
-    image: ${FRONTEND_IMAGE:-ghcr.io/emrullaharkun/mybooktracker-frontend:latest}
+    image: ghcr.io/emrullaharkun/mybooktracker-frontend:${IMAGE_TAG:-latest}
     pull_policy: always
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+  caddy:
+    image: caddy:2-alpine
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ${SSL_CERT_DIR:-./ops/ssl}:/etc/nginx/ssl:ro
+      - ./ops/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
-      - app
+      frontend:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:2019/config/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     restart: always
 
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:

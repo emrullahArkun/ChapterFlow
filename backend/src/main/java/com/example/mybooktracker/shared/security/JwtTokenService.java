@@ -14,16 +14,19 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtTokenService {
 
     private final JWSSigner signer;
     private final long ttlSeconds;
+    private final String issuer;
     private final Clock clock;
 
     public JwtTokenService(@Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.ttl-seconds}") long ttlSeconds,
+            @Value("${app.jwt.issuer}") String issuer,
             Clock clock) {
         if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
             throw new IllegalStateException("JWT secret must be at least 32 bytes long for HS256");
@@ -34,6 +37,7 @@ public class JwtTokenService {
             throw new IllegalStateException("Failed to initialize JWT signer", e);
         }
         this.ttlSeconds = ttlSeconds;
+        this.issuer = issuer;
         this.clock = clock;
     }
 
@@ -44,7 +48,10 @@ public class JwtTokenService {
                     .subject(user.getEmail())
                     .claim("userId", user.getId())
                     .claim("role", user.getRole().name())
+                    .issuer(issuer)
+                    .jwtID(UUID.randomUUID().toString())
                     .issueTime(Date.from(now))
+                    .notBeforeTime(Date.from(now))
                     .expirationTime(Date.from(now.plusSeconds(ttlSeconds)))
                     .build();
 

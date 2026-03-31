@@ -1,10 +1,10 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../../features/auth/model';
+import { useAuth } from '../../features/auth';
+import { ReadingSessionProvider } from '../../features/reading-session';
 import { ROUTES } from './routes';
-import { ReadingSessionProvider } from '../../features/reading-session/model/ReadingSessionContext';
 import AuthGateLoader from './AuthGateLoader';
 
-const ProtectedRoute = ({ requireAdmin }) => {
+const ProtectedRoute = ({ requireAdmin = false }: { requireAdmin?: boolean }) => {
     const { user, loading } = useAuth();
     const location = useLocation();
 

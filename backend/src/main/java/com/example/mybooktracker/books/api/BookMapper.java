@@ -2,15 +2,35 @@ package com.example.mybooktracker.books.api;
 
 import com.example.mybooktracker.books.api.dto.BookDto;
 import com.example.mybooktracker.books.domain.Book;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface BookMapper {
+import java.util.List;
 
-    @Mapping(target = "authorName", source = "author")
-    @Mapping(target = "readingGoalProgress", ignore = true)
-    BookDto toDto(Book book);
+@Component
+public class BookMapper {
+
+    public BookDto toDto(Book book) {
+        if (book == null) {
+            return null;
+        }
+
+        List<String> categories = book.getCategories() == null ? List.of() : List.copyOf(book.getCategories());
+
+        return new BookDto(
+                book.getId(),
+                book.getIsbn(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getPublishYear(),
+                book.getCoverUrl(),
+                book.getPageCount(),
+                book.getCurrentPage(),
+                book.getStartDate(),
+                book.getCompleted(),
+                book.getReadingGoalType(),
+                book.getReadingGoalPages(),
+                null,
+                categories
+        );
+    }
 }

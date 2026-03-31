@@ -17,20 +17,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Slf4j
 public class DataInitializer {
 
+    private static final String DEFAULT_ADMIN_EMAIL = "admin@example.com";
+    private static final String DEFAULT_ADMIN_PASSWORD = "AdminPassword123";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Bean
     public CommandLineRunner initData() {
         return args -> {
-            if (!userRepository.existsByEmail("admin@example.com")) {
+            if (!userRepository.existsByEmail(DEFAULT_ADMIN_EMAIL)) {
                 User admin = new User();
-                admin.setEmail("admin@example.com");
-                admin.setPassword(passwordEncoder.encode("password"));
+                admin.setEmail(DEFAULT_ADMIN_EMAIL);
+                admin.setPassword(passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD));
                 admin.setRole(Role.ADMIN);
                 admin.setEnabled(true);
                 userRepository.save(admin);
-                log.info("Default admin user created: admin@example.com");
+                log.info("Default admin user created: {}", DEFAULT_ADMIN_EMAIL);
             }
         };
     }
