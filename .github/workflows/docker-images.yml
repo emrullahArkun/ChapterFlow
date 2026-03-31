@@ -160,6 +160,10 @@ jobs:
       DEPLOY_USER: ${{ secrets.HETZNER_DEPLOY_USER }}
       DEPLOY_PORT: ${{ secrets.HETZNER_DEPLOY_PORT }}
     steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -170,14 +174,20 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${DEPLOY_PORT:-22}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
 
+      - name: Sync deployment files to Hetzner
+        run: |
+          ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" '
+            set -e
+            mkdir -p /opt/mybooktracker/ops/caddy
+          '
+          scp -P "${DEPLOY_PORT:-22}" docker-compose.prod.yml "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/mybooktracker/docker-compose.prod.yml"
+          scp -P "${DEPLOY_PORT:-22}" ops/caddy/Caddyfile "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/mybooktracker/ops/caddy/Caddyfile"
+
       - name: Deploy tagged images on Hetzner
         run: |
           ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" '
             set -e
             cd /opt/mybooktracker
-            git fetch origin
-            git checkout main
-            git pull --ff-only origin main
             export IMAGE_TAG=sha-${{ github.event.workflow_run.head_sha || github.sha }}
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
