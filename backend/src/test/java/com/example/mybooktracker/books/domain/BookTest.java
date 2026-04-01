@@ -122,6 +122,42 @@ class BookTest {
     }
 
     @Test
+    void assignIdentity_ShouldThrow_WhenReassigned() {
+        Book a = new Book();
+        a.assignIdentity(1L);
+        assertThrows(IllegalStateException.class,
+                () -> a.assignIdentity(2L));
+    }
+
+    @Test
+    void assignIdentity_ShouldAllowSameId() {
+        Book a = new Book();
+        a.assignIdentity(1L);
+        assertDoesNotThrow(() -> a.assignIdentity(1L));
+    }
+
+    @Test
+    void changePageCount_ShouldThrow_WhenNegative() {
+        Book book = new Book();
+        assertThrows(IllegalArgumentException.class,
+                () -> book.changePageCount(-1));
+    }
+
+    @Test
+    void changePageCount_ShouldThrow_WhenZero() {
+        Book book = new Book();
+        assertThrows(IllegalArgumentException.class,
+                () -> book.changePageCount(0));
+    }
+
+    @Test
+    void changePageCount_ShouldAllowNull() {
+        Book book = new Book();
+        assertDoesNotThrow(() -> book.changePageCount(null));
+        assertNull(book.getPageCount());
+    }
+
+    @Test
     void updateProgress_ShouldSetCurrentPage() {
         Book book = new Book();
         book.changePageCount(200);

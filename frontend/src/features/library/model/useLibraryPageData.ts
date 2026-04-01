@@ -16,13 +16,13 @@ const EMPTY_PAGE: PaginatedResponse<Book> = {
 
 type SectionPages = Record<LibrarySectionKey, number>;
 
-const getSectionQueryKey = (token: string | null, section: LibrarySectionKey, page: number) => (
-    ['myBooksSection', token, section, page] as const
+const getSectionQueryKey = (section: LibrarySectionKey, page: number) => (
+    ['myBooksSection', section, page] as const
 );
 
 const useSectionQuery = (token: string | null, section: LibrarySectionKey, page: number) => (
     useQuery<PaginatedResponse<Book>, Error>({
-        queryKey: getSectionQueryKey(token, section, page),
+        queryKey: getSectionQueryKey(section, page),
         queryFn: async () => {
             if (!token) {
                 return EMPTY_PAGE;
@@ -67,12 +67,22 @@ export const useLibraryPageData = (sectionPages: SectionPages) => {
     const deleteSelectedMutation = useMutation<unknown, ApiError, number[]>({
         mutationFn: async (ids) => {
             const results = await Promise.allSettled(ids.map((id) => booksApi.delete(id)));
-            if (results.some((result) => result.status === 'rejected')) {
+            const fulfilled = ids.filter((_, i) => results[i].status === 'fulfilled');
+            const rejected = ids.filter((_, i) => results[i].status === 'rejected');
+
+            if (rejected.length > 0) {
+                setSelectedBooks((prev) => {
+                    const next = new Set(prev);
+                    fulfilled.forEach((id) => next.delete(id));
+                    return next;
+                });
                 throw new Error('Some deletions failed');
             }
         },
         onSuccess: () => {
             setSelectedBooks(new Set());
+        },
+        onSettled: () => {
             invalidateLibraryViews();
         },
     });

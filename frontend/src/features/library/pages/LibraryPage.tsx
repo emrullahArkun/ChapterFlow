@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Flex,
@@ -64,7 +64,7 @@ function LibraryPage() {
     const { isOpen: isDeleteAllOpen, onOpen: onDeleteAllOpen, onClose: onDeleteAllClose } = useDisclosure();
     const { isOpen: isDeleteSelectedOpen, onOpen: onDeleteSelectedOpen, onClose: onDeleteSelectedClose } = useDisclosure();
 
-    const sections: LibrarySection[] = (() => {
+    const sections: LibrarySection[] = useMemo(() => {
         const toSection = (
             key: LibrarySectionKey,
             title: string,
@@ -100,7 +100,7 @@ function LibraryPage() {
                 sectionPagesData.finished
             ),
         ];
-    })();
+    }, [sectionPagesData, activeSession, t]);
 
     useEffect(() => {
         setSectionPages((prev) => {

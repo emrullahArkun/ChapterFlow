@@ -104,7 +104,10 @@ public class Book {
         return book;
     }
 
-    public void assignIdentity(Long id) {
+    void assignIdentity(Long id) {
+        if (this.id != null && !this.id.equals(id)) {
+            throw new IllegalStateException("Book identity cannot be reassigned");
+        }
         this.id = id;
     }
 
@@ -124,6 +127,9 @@ public class Book {
     }
 
     public void changePageCount(Integer pageCount) {
+        if (pageCount != null && pageCount <= 0) {
+            throw new IllegalArgumentException("Page count must be positive");
+        }
         this.pageCount = pageCount;
     }
 

@@ -94,12 +94,10 @@ class ReadingGoalProgressServiceTest {
 
     @Test
     void calculateProgressBatch_ShouldReturnMapWithProgress() {
-        Book weeklyBook = createBook();
-        weeklyBook.assignIdentity(1L);
+        Book weeklyBook = createBookWithId(1L);
         weeklyBook.updateReadingGoal(ReadingGoalType.WEEKLY, 100);
 
-        Book monthlyBook = createBook();
-        monthlyBook.assignIdentity(2L);
+        Book monthlyBook = createBookWithId(2L);
         monthlyBook.updateReadingGoal(ReadingGoalType.MONTHLY, 200);
 
         ReadingSessionQueryPort.BookPageProgress weeklySum = new ReadingSessionQueryPort.BookPageProgress(1L, 25);
@@ -117,8 +115,7 @@ class ReadingGoalProgressServiceTest {
 
     @Test
     void calculateProgressBatch_ShouldReturnZero_WhenNoSessions() {
-        Book book = createBook();
-        book.assignIdentity(1L);
+        Book book = createBookWithId(1L);
         book.updateReadingGoal(ReadingGoalType.WEEKLY, 100);
 
         when(readingSessionQueryPort.sumCompletedPagesByBooksSince(eq(List.of(book)), eq(EXPECTED_WEEK_START)))
@@ -131,8 +128,7 @@ class ReadingGoalProgressServiceTest {
 
     @Test
     void calculateProgressBatch_ShouldSkipBooksWithoutGoals() {
-        Book bookNoGoal = createBook();
-        bookNoGoal.assignIdentity(1L);
+        Book bookNoGoal = createBookWithId(1L);
 
         Map<Long, Integer> result = progressService.calculateProgressBatch(List.of(bookNoGoal));
 
@@ -142,6 +138,11 @@ class ReadingGoalProgressServiceTest {
 
     private Book createBook() {
         return book().id(1L).isbn("isbn123").title("Test Book").publishYear(2023).pageCount(300).currentPage(50)
+                .completed(false).build();
+    }
+
+    private Book createBookWithId(Long id) {
+        return book().id(id).isbn("isbn123").title("Test Book").publishYear(2023).pageCount(300).currentPage(50)
                 .completed(false).build();
     }
 }
