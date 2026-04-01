@@ -72,6 +72,7 @@ function LibraryPage() {
         deleteSelected,
         deleteAll,
         deleteError,
+        clearDeleteError,
     } = useLibraryPageData(sectionPages);
     const { activeSession } = useReadingSessionContext();
 
@@ -127,8 +128,9 @@ function LibraryPage() {
                 status: 'error',
                 duration: 5000,
             }));
+            clearDeleteError();
         }
-    }, [deleteError, toast, t]);
+    }, [clearDeleteError, deleteError, toast, t]);
 
     const confirmDeleteSelected = () => {
         deleteSelected();

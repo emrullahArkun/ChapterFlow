@@ -158,6 +158,20 @@ class BookTest {
     }
 
     @Test
+    void create_ShouldThrow_WhenPageCountIsNotPositive() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Book.create("isbn", "title", "author", 2024, "cover", 0, List.of()));
+    }
+
+    @Test
+    void updateMetadata_ShouldValidatePageCount() {
+        Book book = new Book();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> book.updateMetadata("isbn", "title", "author", 2024, "cover", -1));
+    }
+
+    @Test
     void updateProgress_ShouldSetCurrentPage() {
         Book book = new Book();
         book.changePageCount(200);

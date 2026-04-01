@@ -68,12 +68,7 @@ public class Book {
             Integer pageCount,
             List<String> categories) {
         Book book = new Book();
-        book.isbn = isbn;
-        book.title = title;
-        book.author = author;
-        book.publishYear = publishYear;
-        book.coverUrl = coverUrl;
-        book.pageCount = pageCount;
+        book.updateMetadata(isbn, title, author, publishYear, coverUrl, pageCount);
         book.replaceCategories(categories);
         return book;
     }
@@ -123,7 +118,7 @@ public class Book {
         this.author = author;
         this.publishYear = publishYear;
         this.coverUrl = coverUrl;
-        this.pageCount = pageCount;
+        changePageCount(pageCount);
     }
 
     public void changePageCount(Integer pageCount) {

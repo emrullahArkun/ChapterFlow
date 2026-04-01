@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../auth/model';
 import { booksApi } from '../api';
@@ -36,8 +36,12 @@ const useSectionQuery = (token: string | null, section: LibrarySectionKey, page:
 
 export const useLibraryPageData = (sectionPages: SectionPages) => {
     const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
+    const [deleteError, setDeleteError] = useState<ApiError | null>(null);
     const { token } = useAuth();
     const queryClient = useQueryClient();
+    const clearDeleteError = useCallback(() => {
+        setDeleteError(null);
+    }, []);
 
     const currentQuery = useSectionQuery(token, 'current', sectionPages.current);
     const nextQuery = useSectionQuery(token, 'next', sectionPages.next);
@@ -54,6 +58,9 @@ export const useLibraryPageData = (sectionPages: SectionPages) => {
 
     const deleteBookMutation = useMutation<unknown, ApiError, number>({
         mutationFn: (id) => booksApi.delete(id),
+        onMutate: () => {
+            clearDeleteError();
+        },
         onSuccess: (_, id) => {
             setSelectedBooks((prev) => {
                 const next = new Set(prev);
@@ -61,6 +68,9 @@ export const useLibraryPageData = (sectionPages: SectionPages) => {
                 return next;
             });
             invalidateLibraryViews();
+        },
+        onError: (error) => {
+            setDeleteError(error);
         },
     });
 
@@ -79,8 +89,14 @@ export const useLibraryPageData = (sectionPages: SectionPages) => {
                 throw new Error('Some deletions failed');
             }
         },
+        onMutate: () => {
+            clearDeleteError();
+        },
         onSuccess: () => {
             setSelectedBooks(new Set());
+        },
+        onError: (error) => {
+            setDeleteError(error);
         },
         onSettled: () => {
             invalidateLibraryViews();
@@ -89,9 +105,15 @@ export const useLibraryPageData = (sectionPages: SectionPages) => {
 
     const deleteAllMutation = useMutation<unknown, ApiError>({
         mutationFn: () => booksApi.deleteAll(),
+        onMutate: () => {
+            clearDeleteError();
+        },
         onSuccess: () => {
             setSelectedBooks(new Set());
             invalidateLibraryViews();
+        },
+        onError: (error) => {
+            setDeleteError(error);
         },
     });
 
@@ -120,6 +142,7 @@ export const useLibraryPageData = (sectionPages: SectionPages) => {
         deleteBook: (id: number) => deleteBookMutation.mutate(id),
         deleteSelected: () => deleteSelectedMutation.mutate(Array.from(selectedBooks)),
         deleteAll: () => deleteAllMutation.mutate(),
-        deleteError: deleteBookMutation.error ?? deleteSelectedMutation.error ?? deleteAllMutation.error,
+        deleteError,
+        clearDeleteError,
     };
 };
